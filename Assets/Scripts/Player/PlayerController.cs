@@ -5,37 +5,37 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    #region Properties
     private static PlayerController Singleton;
 
-    [SerializeField]
-    private float sideMovementSpeed = 1f;
-    [SerializeField]
-    private float forwardMovementSpeed = 1f;
+    [Header("Movement Settings")]
+    [SerializeField] private float sideMovementSpeed = 1f;
+    [SerializeField] private float forwardMovementSpeed = 1f;
+    [SerializeField] private float dashSpeedMultiplier = 2f;
+
+    [Header("Dash Settings")]
+    [SerializeField] private float dashDuration = 1f;
+    [SerializeField] private float dashCooldownDuration = 1f;
 
     private float _currentTargetX;
-
-    public static int CurrentLaneInt { get => _currentLaneInt; set => _currentLaneInt = value; }
-    private static int _currentLaneInt = 1;  // The integer of the lane used in the LaneManager to get the current/target lane position.
+    private bool _dashing = false;
+    private float _dashTimer;
+    private bool _dashCooldown = false;
 
     private Rigidbody _rb;
     private PlayerInput _playerInput;
 
-    // Events
-    public static Action OnLaneSwitch;  // Started a lane switch.
-    public static Action OnSwitchedLane; // Reached a new lane.
-
-    // Visualization
     public TextMeshProUGUI debugText1;
     public TextMeshProUGUI debugText2;
     public TextMeshProUGUI debugText3;
 
-    // Getters & Setters
+    public static int CurrentLaneInt { get; set; } = 1;
     public static float ForwardMovementSpeed { get => Singleton.forwardMovementSpeed; set => Singleton.forwardMovementSpeed = value; }
     public static float SideMovementSpeed { get => Singleton.sideMovementSpeed; set => Singleton.sideMovementSpeed = value; }
     public static float CurrentDistance => Singleton.transform.position.z;
 
-    #endregion
+    public static Action OnLaneSwitch;  // Started a lane switch.
+    public static Action OnSwitchedLane; // Reached a new lane.
+
 
     #region Initiation
     private void Awake()
@@ -52,7 +52,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Start()
     {
-        _currentTargetX = LaneManager.GetLaneX(_currentLaneInt);
+        _currentTargetX = LaneManager.GetLaneX(CurrentLaneInt);
         _rb.position = LaneManager.GetTargetLanePosition(_rb.position, CurrentLaneInt);
     }
 
@@ -67,6 +67,7 @@ public class PlayerController : MonoBehaviour
 
         // Input reading
         _playerInput.Standard.SwitchLane.started -= ctx => OnSwitchLane(ctx);
+        _playerInput.Standard.Dash.started -= ctx => OnDash(ctx);
     }
     #endregion
 
@@ -78,6 +79,16 @@ public class PlayerController : MonoBehaviour
         // Enable Input Reading
         _playerInput.Enable();
         _playerInput.Standard.SwitchLane.started += ctx => OnSwitchLane(ctx);
+        _playerInput.Standard.Dash.started += ctx => OnDash(ctx);
+    }
+
+    private void OnDash(InputAction.CallbackContext ctx)
+    {
+        if (!_dashing && !_dashCooldown)
+        {
+            _dashing = true;
+            _dashTimer = Time.time + dashDuration;
+        }
     }
 
     private void Update()
@@ -88,22 +99,36 @@ public class PlayerController : MonoBehaviour
         debugText2.SetText($"Side speed: {sideMovementSpeed}");
 
         ForwardMovement();
+        Dash();
         LaneSwitching();
 
         void ForwardMovement()
         {
             Vector3 currentPos = _rb.position;
 
-            float step = ForwardMovementSpeed * Time.deltaTime;
+            float step = (_dashing ? ForwardMovementSpeed * dashSpeedMultiplier : ForwardMovementSpeed) * Time.deltaTime;
             float targetZ = currentPos.z + 1f;
             float curZ = Mathf.MoveTowards(_rb.position.z, targetZ, step);
 
             currentPos.z = curZ;
             _rb.MovePosition(currentPos);
         }
+        void Dash()
+        {
+            if (_dashing && Time.time >= _dashTimer)
+            {
+                _dashing = false;
+                _dashCooldown = true;
+                _dashTimer = Time.time + dashCooldownDuration;
+            }
+            if (_dashCooldown && Time.time >= _dashTimer)
+            {
+                _dashCooldown = false;
+            }
+        }
         void LaneSwitching()
         {
-            float step = sideMovementSpeed * Time.deltaTime;
+            float step = (_dashing ? ForwardMovementSpeed * dashSpeedMultiplier : ForwardMovementSpeed) * Time.deltaTime;
             float curX = Mathf.MoveTowards(_rb.position.x, _currentTargetX, step);
 
             Vector3 currentPos = _rb.position;

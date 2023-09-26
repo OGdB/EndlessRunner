@@ -9,16 +9,11 @@ public class GameController : MonoBehaviour
     private static GameController Singleton;
     public static bool GameStarted { get; private set; } = false;
 
-    [SerializeField]
-    private GameObject startCanvas;
-    [SerializeField]
-    private TextMeshProUGUI countdownTimerText;
-    [SerializeField]
-    private TextMeshProUGUI scoreText;
-    [SerializeField]
-    private TextMeshProUGUI livesText; 
-    [SerializeField]
-    private TextMeshProUGUI timeText;
+    [SerializeField] private GameObject startCanvas;
+    [SerializeField] private TextMeshProUGUI countdownTimerText;
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI livesText;
+    [SerializeField] private TextMeshProUGUI timeText;
 
     private static int _score = 0;
     private static int _lives = 3;
@@ -26,9 +21,7 @@ public class GameController : MonoBehaviour
     private static double _startTime = 0;
     private static double _endTime = 0;
 
-    // Events
-    public static Action OnGameStart { get => onGameStart; set => onGameStart = value; }
-    private static Action onGameStart;
+    public static Action OnGameStart;
     public static Action OnGameOver;
     public static Action OnGameRestart;
 
@@ -63,7 +56,7 @@ public class GameController : MonoBehaviour
     {
         GameStarted = false;
         _endTime = Time.time;
-        _totalTime = _endTime- _startTime;
+        _totalTime = _endTime - _startTime;
         Singleton.timeText.SetText($"Time: {_totalTime}");
 
         OnGameOver?.Invoke();

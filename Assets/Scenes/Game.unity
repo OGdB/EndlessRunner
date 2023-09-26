@@ -488,7 +488,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   seed: 1657767745
   numberOfObstacleLines: 9
-  distanceUntilFirstObstacle: 17.5
+  distanceUntilFirstObstacle: 10
   distanceBetweenObstacles: 12
   greyObstacle: {fileID: 289561915093742194, guid: c36b4e0713850574d906c599a1d94667, type: 3}
   blueObstacle: {fileID: 1065654330490064216, guid: 098ab4cf94e5da948b13ac7be2a0893f, type: 3}
@@ -901,6 +901,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sideMovementSpeed: 10
   forwardMovementSpeed: 5
+  dashSpeedMultiplier: 2
+  dashDuration: 0.2
+  dashCooldownDuration: 4
   debugText1: {fileID: 327071284}
   debugText2: {fileID: 99684414}
   debugText3: {fileID: 530788491}
@@ -943,6 +946,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd5d41153631dcb4e8ee89d4f2b928f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  immunityLength: 3
+  blinkIntervalSpeed: 0.6
+  alphaOnBlink: 0.6
 --- !u!1 &530788489
 GameObject:
   m_ObjectHideFlags: 0

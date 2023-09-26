@@ -4,18 +4,17 @@ public class DifficultyProgression : MonoBehaviour
 {
     #region Properties
     [Header("Speed")]
-    [SerializeField, Tooltip("At this speed, the speed will stop increasing.")] 
-    private float maxSpeed;
+    [Tooltip("At this speed, the speed will stop increasing.")] 
+    [SerializeField] private float maxSpeed;
 
-    [SerializeField, Tooltip("The total speed increase per interval.")]
-    private float forwardSpeedIncreaseInterval = 2.5f;
-    private float _sideSpeedIncreaseInterval;
+    [Tooltip("The total speed increase per interval.")]
+    [SerializeField] private float forwardSpeedIncreaseInterval = 2.5f;
 
     [SerializeField, Tooltip("The amount of seconds the player will run at a speed before it gradually increases.")]
     private float speedIncreaseIntervalSeconds = 15f;
 
-    [SerializeField, Tooltip("The speed at which the speed increases. Side speed increases proportionate.")]
-    private float _forwardSpeedIncreaseRate = 0.1f;
+    [Tooltip("The speed at which the speed increases. Side speed increases proportionate.")]
+    [SerializeField] private float _forwardSpeedIncreaseRate = 0.1f;
     private float _sideSpeedIncreaseRate;
 
     private float _startSpeed;
@@ -43,7 +42,6 @@ public class DifficultyProgression : MonoBehaviour
         _nextSpeedIncreaseTime = Time.time + speedIncreaseIntervalSeconds;
 
         float forwardSideRatio = PlayerController.SideMovementSpeed / PlayerController.ForwardMovementSpeed;
-        _sideSpeedIncreaseInterval = forwardSideRatio * forwardSpeedIncreaseInterval;
         _sideSpeedIncreaseRate = forwardSideRatio * _forwardSpeedIncreaseRate;
     }
 

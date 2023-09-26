@@ -35,6 +35,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Dash"",
+                    ""type"": ""Button"",
+                    ""id"": ""b7c3ae95-fe00-40d2-a9c2-49c6541f8933"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -136,6 +145,39 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""action"": ""SwitchLane"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""75d69ee8-d0a8-4c43-a1a8-7a5d2dd45a62"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""13d94faf-9635-43e5-bcc4-3bf6bc023731"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d968206c-8d94-4d5e-8ec6-bf9305786a7a"",
+                    ""path"": ""<Joystick>/stick/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -145,6 +187,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         // Standard
         m_Standard = asset.FindActionMap("Standard", throwIfNotFound: true);
         m_Standard_SwitchLane = m_Standard.FindAction("SwitchLane", throwIfNotFound: true);
+        m_Standard_Dash = m_Standard.FindAction("Dash", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -207,11 +250,13 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Standard;
     private List<IStandardActions> m_StandardActionsCallbackInterfaces = new List<IStandardActions>();
     private readonly InputAction m_Standard_SwitchLane;
+    private readonly InputAction m_Standard_Dash;
     public struct StandardActions
     {
         private @PlayerInput m_Wrapper;
         public StandardActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
         public InputAction @SwitchLane => m_Wrapper.m_Standard_SwitchLane;
+        public InputAction @Dash => m_Wrapper.m_Standard_Dash;
         public InputActionMap Get() { return m_Wrapper.m_Standard; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -224,6 +269,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @SwitchLane.started += instance.OnSwitchLane;
             @SwitchLane.performed += instance.OnSwitchLane;
             @SwitchLane.canceled += instance.OnSwitchLane;
+            @Dash.started += instance.OnDash;
+            @Dash.performed += instance.OnDash;
+            @Dash.canceled += instance.OnDash;
         }
 
         private void UnregisterCallbacks(IStandardActions instance)
@@ -231,6 +279,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @SwitchLane.started -= instance.OnSwitchLane;
             @SwitchLane.performed -= instance.OnSwitchLane;
             @SwitchLane.canceled -= instance.OnSwitchLane;
+            @Dash.started -= instance.OnDash;
+            @Dash.performed -= instance.OnDash;
+            @Dash.canceled -= instance.OnDash;
         }
 
         public void RemoveCallbacks(IStandardActions instance)
@@ -251,5 +302,6 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     public interface IStandardActions
     {
         void OnSwitchLane(InputAction.CallbackContext context);
+        void OnDash(InputAction.CallbackContext context);
     }
 }

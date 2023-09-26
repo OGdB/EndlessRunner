@@ -6,12 +6,9 @@ using UnityEngine;
 /// </summary>
 public class HitDetection : MonoBehaviour
 {
-    [SerializeField]
-    private float immunityLength = 3f;
-    [SerializeField]
-    private float blinkIntervalSpeed = 0.6f;
-    [SerializeField]
-    private float alphaOnBlink = 0.4f;
+    [SerializeField] private float immunityLength = 3f;
+    [SerializeField] private float blinkIntervalSpeed = 0.6f;
+    [SerializeField] private float alphaOnBlink = 0.4f;
     private bool _blinking = false;
 
     private MeshRenderer _playerRenderer;
@@ -34,7 +31,9 @@ public class HitDetection : MonoBehaviour
                 OnObstacleHit();
             }
             else
+            {
                 Debug.LogWarning("Hit a gameobject on obstacle layer without obstacle script");
+            }
         }
     }
 
@@ -58,13 +57,12 @@ public class HitDetection : MonoBehaviour
             {
                 timer += Time.time - timeStamp;
 
-                _playerRenderer.material.color = nextColor; // Modify the base color property.
+                _playerMaterial.SetColor("_BaseColor", nextColor);
 
-                yield return blinkInterval; // Wait for the specified interval.
-                print("Blink");
+                yield return blinkInterval;
+
                 nextColor.a = nextColor.a == alphaOnBlink ? 1f : alphaOnBlink;
             }
-            print("Finished blink");
 
             _playerMaterial.color = startColor;
             _blinking = false;

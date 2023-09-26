@@ -7,16 +7,12 @@ using UnityEngine;
 public class LaneManager : MonoBehaviour
 {
     #region Properties
-    [SerializeField]
-    private int startLaneAmount = 4;
-    [SerializeField]
-    private Transform lanePrefab;
-    [SerializeField]
-    private float laneWidth = 3f;
+    [SerializeField] private int startLaneAmount = 4;
+    [SerializeField] private Transform lanePrefab;
+    [SerializeField] private float laneWidth = 3f;
 
     public static List<Transform> Lanes { get; private set; } = new();
     public static int NumberOfLanes { get; private set; } = 4;
-
     #endregion
 
     private void Awake()

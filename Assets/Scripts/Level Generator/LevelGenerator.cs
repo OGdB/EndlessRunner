@@ -10,52 +10,42 @@ using UnityEngine.UI;
 public class LevelGenerator : MonoBehaviour
 {
     #region Variables & Properties
-    [SerializeField]
-    private int seed; // Player-provided or randomly generated seed
+    [SerializeField] private int seed; // Player-provided or randomly generated seed
     public static int Seed { get; set; }
 
-    [SerializeField, Tooltip("The number of obstacle lines that will be generated and maintained during the game.")]
-    private int numberOfObstacleLines = 6;
-    [SerializeField]
-    private float distanceUntilFirstObstacle = 15f;
-    [SerializeField]
-    private float distanceBetweenObstacles = 10f;
+    [Tooltip("The number of obstacle lines that will be generated and maintained during the game.")]
+    [SerializeField] private int numberOfObstacleLines = 6;
+    [SerializeField] private float distanceUntilFirstObstacle = 15f;
+    [SerializeField] private float distanceBetweenObstacles = 10f;
     private float _nextObstacleSpawnZ;
 
-    [Header("Obstacles"), SerializeField]
-    private GreyObstacle greyObstacle;
-    [SerializeField]
-    private BlueObstacle blueObstacle;
-    [SerializeField]
-    private OrangeObstacle orangeObstacle;
-    [Space(5), SerializeField, Range(0, 1f)]
-    private float greyObstacleChance = 0.4f; // Probability for grey obstacle
-    [SerializeField, Range(0, 1f)]
-    private float blueObstacleChance = 0.3f; // Probability for blue obstacle
+    [Header("Obstacles")]
+    [SerializeField] private GreyObstacle greyObstacle;
+    [SerializeField] private BlueObstacle blueObstacle;
+    [SerializeField] private OrangeObstacle orangeObstacle;
 
-    [Header("Powerups"), SerializeField]
-    private GreenPowerup greenPowerup;
-    [SerializeField]
-    private RedPowerup redPowerup;
+    [Space(5)]
+    [SerializeField, Range(0, 1f)] private float greyObstacleChance = 0.4f; // Probability for grey obstacle
+    [SerializeField, Range(0, 1f)] private float blueObstacleChance = 0.3f; // Probability for blue obstacle
 
-    [Header("Start UI"), SerializeField]
-    private Button startGameButton; 
-    [SerializeField]
-    private TMPro.TMP_InputField seedInput;
-    [SerializeField]
-    private Toggle randomSeedToggle;
+    [Header("Powerups")]
+    [SerializeField] private GreenPowerup greenPowerup;
+    [SerializeField] private RedPowerup redPowerup;
+
+    [Header("Start UI")]
+    [SerializeField] private Button startGameButton; 
+    [SerializeField] private TMPro.TMP_InputField seedInput;
+    [SerializeField] private Toggle randomSeedToggle;
 
     private int _numberOfGeneratedObstacles = 0;
 
     private static Transform _obstacleParent;
     private static Transform _powerupsParent;
 
-    // Pools
     private static Queue<InteractableBlock> _greyObstaclesPool = new();
     private static Queue<InteractableBlock> _blueObstaclesPool = new();
     private static Queue<InteractableBlock> _orangeObstaclesPool = new();
 
-    // Value getters/setters.
     public void SetSeed(string input)
     {
         if (!randomSeedToggle.isOn)  // If not a randomized seed
