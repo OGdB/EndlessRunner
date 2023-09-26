@@ -64,7 +64,7 @@ public class BlueObstacle : GreyObstacle
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer != LayerMask.NameToLayer("Interactable") || transform.position == _targetPosition) return;
+        if (transform.position == _targetPosition) return;  // If at target / rest position
 
         // If colliding with another obstacle, change direction and reset the timer
         _currentDirectionInt *= -1;

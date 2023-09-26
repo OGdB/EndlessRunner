@@ -14,8 +14,8 @@ public class LevelGenerator : MonoBehaviour
     private int seed; // Player-provided or randomly generated seed
     public static int Seed { get; set; }
 
-    [SerializeField]
-    private int amountOfLinesOnStart = 6;
+    [SerializeField, Tooltip("The number of obstacle lines that will be generated and maintained during the game.")]
+    private int numberOfObstacleLines = 6;
     [SerializeField]
     private float distanceUntilFirstObstacle = 15f;
     [SerializeField]
@@ -32,8 +32,6 @@ public class LevelGenerator : MonoBehaviour
     private float greyObstacleChance = 0.4f; // Probability for grey obstacle
     [SerializeField, Range(0, 1f)]
     private float blueObstacleChance = 0.3f; // Probability for blue obstacle
-    [SerializeField, Range(0, 1f)]
-    private float orangeObstacleChance = 0.3f; // Probability for orange obstacle
 
     [Header("Powerups"), SerializeField]
     private GreenPowerup greenPowerup;
@@ -98,9 +96,7 @@ public class LevelGenerator : MonoBehaviour
         for (int i = 0; i < 12; i++)
         {
             InstantiatePoolInstance(greyObstacle, _greyObstaclesPool);
-
             InstantiatePoolInstance(blueObstacle, _blueObstaclesPool);
-
             InstantiatePoolInstance(orangeObstacle, _orangeObstaclesPool);
         }
     }
@@ -132,7 +128,7 @@ public class LevelGenerator : MonoBehaviour
         _nextObstacleSpawnZ = distanceUntilFirstObstacle;
 
         // First line spawns at 'distanceUntilFirstObstacle' distance. From there, it follows the rule.
-        for (int i = 0; i < amountOfLinesOnStart; i++)
+        for (int i = 0; i < numberOfObstacleLines; i++)
         {
             SpawnObstacleLine(_nextObstacleSpawnZ);
             _nextObstacleSpawnZ += distanceBetweenObstacles;

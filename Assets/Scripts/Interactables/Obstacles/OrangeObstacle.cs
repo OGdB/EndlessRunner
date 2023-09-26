@@ -51,7 +51,7 @@ public class OrangeObstacle : GreyObstacle
     private void OnTriggerEnter(Collider other)
     {
         // If colliding with another obstacle, restart the coroutine with moving in the other direction.
-        if (other.gameObject.layer != LayerMask.NameToLayer("Interactable") && !_isMoving) return;
+        if (!_isMoving) return;  // Don't start moving if it the other block is moving into this block while stationary.
 
         StopAllCoroutines();
         CurrentLaneInt = lastLaneInt;

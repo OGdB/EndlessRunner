@@ -487,7 +487,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   seed: 1657767745
-  amountOfLinesOnStart: 20
+  numberOfObstacleLines: 9
   distanceUntilFirstObstacle: 17.5
   distanceBetweenObstacles: 12
   greyObstacle: {fileID: 289561915093742194, guid: c36b4e0713850574d906c599a1d94667, type: 3}
@@ -495,7 +495,6 @@ MonoBehaviour:
   orangeObstacle: {fileID: 3331422409310284404, guid: 2e72755183d950949aa06bb74ef8f8fa, type: 3}
   greyObstacleChance: 0.5
   blueObstacleChance: 0.25
-  orangeObstacleChance: 0.25
   greenPowerup: {fileID: 6183635221888174085, guid: 5f7fd8477ab0f7f4f814fcba126be7ec, type: 3}
   redPowerup: {fileID: 3660007207044869927, guid: 11a11c93930bbf3468cd81f552b8c7a7, type: 3}
   startGameButton: {fileID: 1922974006}

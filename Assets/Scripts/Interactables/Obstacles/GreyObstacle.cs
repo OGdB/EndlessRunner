@@ -55,5 +55,7 @@ public class GreyObstacle : InteractableBlock
 
             yield return FUpdate;
         }
+
+        transform.position = targetLanePos;
     }
 }

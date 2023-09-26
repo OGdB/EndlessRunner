@@ -84,8 +84,8 @@ public class PlayerController : MonoBehaviour
     {
         if (!GameController.GameStarted) return;
 
-        debugText1.SetText($"Current Lane: {forwardMovementSpeed}");
-        debugText2.SetText($"Current Lane: {sideMovementSpeed}");
+        debugText1.SetText($"Forward speed: {forwardMovementSpeed}");
+        debugText2.SetText($"Side speed: {sideMovementSpeed}");
 
         ForwardMovement();
         LaneSwitching();

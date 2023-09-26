@@ -42,16 +42,9 @@ public class LaneManager : MonoBehaviour
         }
     }
 
+    private void OnEnable() => GreenPowerup.OnGreenPowerup += AddLane;
 
-    private void OnEnable()
-    {
-        GreenPowerup.OnGreenPowerup += AddLane;
-    }
-
-    private void OnDisable()
-    {
-        GreenPowerup.OnGreenPowerup -= AddLane;
-    }
+    private void OnDisable() => GreenPowerup.OnGreenPowerup -= AddLane;
 
     /// <summary>
     /// Instantiates a lane on the side the player is closest to.
