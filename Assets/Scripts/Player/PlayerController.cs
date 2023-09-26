@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[DefaultExecutionOrder(-1)]
 public class PlayerController : MonoBehaviour
 {
     private static PlayerController Singleton;
@@ -22,7 +23,7 @@ public class PlayerController : MonoBehaviour
     private bool _dashCooldown = false;
 
     private Rigidbody _rb;
-    private PlayerInput _playerInput;
+    public static PlayerInput _playerInput;
 
     public TextMeshProUGUI debugText1;
     public TextMeshProUGUI debugText2;
@@ -165,6 +166,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnDestroy()
     {
+        CurrentLaneInt = 1;
+        _playerInput = null;
         Singleton = null;
     }
 }

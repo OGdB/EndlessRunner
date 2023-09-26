@@ -9,35 +9,25 @@ using UnityEngine.SceneManagement;
 public class PauseMenu : MonoBehaviour
 {
     #region Properties
-    [SerializeField, Range(0.25f, 2f), Tooltip("The speed at which the menu appears/disappears")]
-    private float appearSpeed = 0.5f;
+    [Range(0.25f, 2f), Tooltip("The speed at which the menu appears/disappears")]
+    [SerializeField] private float appearSpeed = 0.5f;
 
-    [SerializeField, Space(10)]
-    private KeyCode[] pauseButtons = new KeyCode[] { KeyCode.Escape };
-
-    [SerializeField, Space(10), Tooltip("Events invoked when the application is paused.")]
-    private UnityEvent onPauseEvents;
-    [SerializeField, Tooltip("Events invoked when the application is resumed.")]
-    private UnityEvent onResumeEvents;
+    [Space(10), Tooltip("Events invoked when the application is paused.")]
+    [SerializeField] private UnityEvent onPauseEvents;
+    [Tooltip("Events invoked when the application is resumed.")]
+    [SerializeField] private UnityEvent onResumeEvents;
 
     public static bool isPaused = false;
     #endregion
 
     // Can be changed to be invoked by the new input system.
-    private void Update()
+    private void OnEnable()
     {
-        bool pausePressed = false;
-        
-        // Iterate over all set pause buttons to see if it is pressed.
-        // New input system is probably more efficient.
-        foreach (var pauseButton in pauseButtons)
-        {
-            if (Input.GetKeyDown(pauseButton))
-                pausePressed = true;
-        }
-
-        if (pausePressed)
-            SwitchPauseState();
+        PlayerController._playerInput.Standard.Pause.started += _ => SwitchPauseState();
+    }
+    private void OnDisable()
+    {
+        PlayerController._playerInput.Standard.Pause.started -= _ => SwitchPauseState();
     }
 
     /// <summary>

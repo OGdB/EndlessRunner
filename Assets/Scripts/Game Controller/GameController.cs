@@ -3,6 +3,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
+[DefaultExecutionOrder(0)]
 public class GameController : MonoBehaviour
 {
     #region Properties
