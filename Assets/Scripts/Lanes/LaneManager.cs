@@ -13,8 +13,6 @@ public class LaneManager : MonoBehaviour
 
     public static List<Transform> Lanes { get; private set; } = new();
     public static int NumberOfLanes { get; set; } = 4;
-    public static int StartLaneAmount { get; set; } = 4;
-    public void SetStartLaneAmount(string value) => StartLaneAmount = int.Parse(value);
     #endregion
 
     private void OnEnable()
@@ -31,7 +29,7 @@ public class LaneManager : MonoBehaviour
 
     private void GameController_OnGameStart()
     {
-        NumberOfLanes = StartLaneAmount;
+        NumberOfLanes = LevelGenerator.CurrentLevelSettings.startNumberOfLanes;
 
         Vector3 initialPosition = new(-((NumberOfLanes - 1) * laneWidth) / 2f, -0.5f, 0f);
 
@@ -230,7 +228,6 @@ public class LaneManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        NumberOfLanes = StartLaneAmount;
         Lanes.Clear();
         Lanes = new();
     }
