@@ -9,15 +9,13 @@ using UnityEngine.UI;
 /// </summary>
 public class LevelGenerator : MonoBehaviour
 {
-    #region Variables & Properties
-    [SerializeField] private int seed; // Player-provided or randomly generated seed
+    #region Variables & Properties    
     public static int Seed { get; set; }
+    private static bool IsFirstTimeLoading = true;
 
     [Tooltip("The number of obstacle lines that will be generated and maintained during the game.")]
-    [SerializeField] private int numberOfObstacleLines = 6;
-    [SerializeField] private float distanceUntilFirstObstacle = 15f;
-    [SerializeField] private float distanceBetweenObstacles = 10f;
-    private float _nextObstacleSpawnZ;
+    [SerializeField, Range(0.1f, 1f)] private float rowObstaclePercentage = 0.8f;
+    private float _nextRowZPos;
 
     [Header("Obstacles")]
     [SerializeField] private GreyObstacle greyObstacle;
@@ -34,10 +32,14 @@ public class LevelGenerator : MonoBehaviour
 
     [Header("Start UI")]
     [SerializeField] private Button startGameButton; 
-    [SerializeField] private TMPro.TMP_InputField seedInput;
+    [SerializeField] private TMPro.TMP_InputField seedInputField;
+    [SerializeField] private TMPro.TMP_InputField numberOfStartLanesInput;
+    [SerializeField] private TMPro.TMP_InputField visObstRowsInput;
+    [SerializeField] private TMPro.TMP_InputField distToFirstRowInput;
+    [SerializeField] private TMPro.TMP_InputField distBetweenRowsInput;
     [SerializeField] private Toggle randomSeedToggle;
 
-    private int _numberOfGeneratedObstacles = 0;
+    private static int _numberOfGeneratedObstacles = 0;
 
     private static Transform _obstacleParent;
     private static Transform _powerupsParent;
@@ -46,14 +48,27 @@ public class LevelGenerator : MonoBehaviour
     private static Queue<InteractableBlock> _blueObstaclesPool = new();
     private static Queue<InteractableBlock> _orangeObstaclesPool = new();
 
+    public static int NumberOfVisibleObstacleRows;
+    public static float DistanceToFirstRow;
+    public static float DistanceBetweenRows;
+
+    public LevelGenerationSettings _currentSettings = null;
+
+    public void SetNumberOfVisibleObstacleRows(string value) => NumberOfVisibleObstacleRows = int.Parse(value);
+    public void SetDistanceToFirstRow(string value) => DistanceToFirstRow = float.Parse(value);
+    public void SetDistanceBetweenRows(string value) => DistanceBetweenRows = float.Parse(value);
+
+    /// <summary>
+    /// Set the seed to the string input. Used by the inputfield.
+    /// </summary>
+    /// <param name="input">The input string representing the seed.</param>
     public void SetSeed(string input)
     {
         if (!randomSeedToggle.isOn)  // If not a randomized seed
         {
             if (int.TryParse(input, out int value))
             {
-                seed = value;
-                Seed = seed;
+                Seed = value;
             }
             else
             {
@@ -66,21 +81,14 @@ public class LevelGenerator : MonoBehaviour
             RandomSeed();
         }
 
-        void RandomSeed()
-        {
-            seed = Random.Range(0, int.MaxValue);
-            Seed = seed;
-        }
+        void RandomSeed() => Seed = Random.Range(0, int.MaxValue);
     }
     #endregion
-
 
     private void Awake()
     {
         _obstacleParent = new GameObject("Obstacles").transform;
         _powerupsParent = new GameObject("Powerups").transform;
-
-        seedInput.SetTextWithoutNotify(Random.Range(0, int.MaxValue).ToString());
 
         // Populate the obstacle pools
         for (int i = 0; i < 12; i++)
@@ -90,7 +98,21 @@ public class LevelGenerator : MonoBehaviour
             InstantiatePoolInstance(orangeObstacle, _orangeObstaclesPool);
         }
     }
+    private void Start()
+    {
+        // Import level settings only the first time loading the scene.
+        if (IsFirstTimeLoading)
+        {
+            IsFirstTimeLoading = false;
+            TryImportLevelSettings();
+        }
 
+        seedInputField.SetTextWithoutNotify(Seed.ToString());
+        numberOfStartLanesInput.SetTextWithoutNotify(LaneManager.StartLaneAmount.ToString());
+        visObstRowsInput.SetTextWithoutNotify(NumberOfVisibleObstacleRows.ToString());
+        distToFirstRowInput.SetTextWithoutNotify(DistanceToFirstRow.ToString());
+        distBetweenRowsInput.SetTextWithoutNotify(DistanceBetweenRows.ToString());
+    }
     private void OnEnable()
     {
         BlockCleaner.PassedObstacleLine += SpawnNextObstacleLine;
@@ -102,39 +124,75 @@ public class LevelGenerator : MonoBehaviour
         GameController.OnGameStart -= GameController_OnGameStart;
     }
 
+    private void TryImportLevelSettings()
+    {
+        _currentSettings = LevelGenerationSettings.ImportFromJson();
+
+        if (_currentSettings != null)
+        {
+            SetLevelSettingValues(_currentSettings);
+        }
+        else
+        {
+            // Invalid settings = Go with default values.
+            Seed = Random.Range(0, int.MaxValue);
+
+            Notifier.SetNotification("Imported settings were invalid.");
+            Debug.LogWarning("Imported settings are invalid.");
+        }
+    }
+
+    private void SetLevelSettingValues(LevelGenerationSettings _settings)
+    {
+        Seed = _settings.seed; 
+        Random.InitState(Seed);
+
+        NumberOfVisibleObstacleRows = _settings.numberOfVisibleObstacleRows;
+        DistanceToFirstRow = _settings.distanceToFirstRow;
+        DistanceBetweenRows = _settings.distanceBetweenRows;
+        greyObstacleChance = _settings.greyObstacleChance;
+        blueObstacleChance = _settings.blueObstacleChance;
+        LaneManager.StartLaneAmount = _settings.startNumberOfLanes;
+    }
+
     private void GameController_OnGameStart()
     {
         // Set the seed based on the input of the inputfield // random seed toggle.
         startGameButton.gameObject.SetActive(false);
-        seedInput.gameObject.SetActive(false);
+        seedInputField.gameObject.SetActive(false);
         randomSeedToggle.gameObject.SetActive(false);
 
-        // If a seed is already set use that seed.
-        if (Seed == default)
-            SetSeed(seedInput.text);
+        // Update the level generator settings with the values set.
+        _currentSettings = new(NumberOfVisibleObstacleRows,
+                                   DistanceToFirstRow,
+                                   DistanceBetweenRows,
+                                   greyObstacleChance,
+                                   blueObstacleChance,
+                                   LaneManager.StartLaneAmount,
+                                   Seed);
 
-        Random.InitState(Seed);
+        SetLevelSettingValues(_currentSettings);
 
-        _nextObstacleSpawnZ = distanceUntilFirstObstacle;
+        _nextRowZPos = DistanceToFirstRow;
 
         // First line spawns at 'distanceUntilFirstObstacle' distance. From there, it follows the rule.
-        for (int i = 0; i < numberOfObstacleLines; i++)
+        for (int i = 0; i < NumberOfVisibleObstacleRows; i++)
         {
-            SpawnObstacleLine(_nextObstacleSpawnZ);
-            _nextObstacleSpawnZ += distanceBetweenObstacles;
+            SpawnObstacleLine(_nextRowZPos);
+            _nextRowZPos += DistanceBetweenRows;
         }
     }
 
     private void SpawnNextObstacleLine()
     {
-        SpawnObstacleLine(_nextObstacleSpawnZ);
-        _nextObstacleSpawnZ += distanceBetweenObstacles;
+        SpawnObstacleLine(_nextRowZPos);
+        _nextRowZPos += DistanceBetweenRows;
     }
 
     private void SpawnObstacleLine(float zPosition)
     {
         // More obstacles
-        int amountOfObstacles = Random.Range(1, LaneManager.Lanes.Count);
+        int amountOfObstacles = Random.Range(Mathf.FloorToInt(LaneManager.NumberOfLanes * 0.7f), Mathf.FloorToInt(LaneManager.NumberOfLanes * rowObstaclePercentage));
         List<int> laneIntegers = LaneManager.GetRandomUniqueLaneInts(amountOfObstacles);
 
         for (int i = 0; i < amountOfObstacles; i++)
@@ -149,6 +207,11 @@ public class LevelGenerator : MonoBehaviour
             obstacle.gameObject.SetActive(true);
         }
     }
+
+    /// <summary>
+    /// Exports the current level generation settings to a JSON file.
+    /// </summary>
+    public void ExportLevelSettings() => _currentSettings.ExportToJson();
 
     private InteractableBlock GetRandomObstacle()
     {
@@ -175,14 +238,11 @@ public class LevelGenerator : MonoBehaviour
             InteractableBlock poolObject = pool.Dequeue();
             return poolObject;
         }
-        else
+        else  // Nothing left in pool
         {
-            // Fill up the queue more.
             for (int i = 0; i < 5; i++)
             {
-                InteractableBlock obstacle = Instantiate(original, _obstacleParent);
-                obstacle.gameObject.SetActive(false);
-                pool.Enqueue(obstacle);
+                InstantiatePoolInstance(original, pool);
             }
 
             return Instantiate(original, _obstacleParent);
@@ -212,7 +272,7 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    private void InstantiatePoolInstance(InteractableBlock original, Queue<InteractableBlock> pool)
+    private static void InstantiatePoolInstance(InteractableBlock original, Queue<InteractableBlock> pool)
     {
         InteractableBlock instance = Instantiate(original, _obstacleParent);
         instance.name = $"{original.GetType().Name} {_numberOfGeneratedObstacles}";

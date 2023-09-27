@@ -4,22 +4,35 @@ using UnityEngine;
 /// <summary>
 /// Responsible for instantiating lanes.
 /// </summary>
+[DefaultExecutionOrder(-100)]
 public class LaneManager : MonoBehaviour
 {
     #region Properties
-    [SerializeField] private int startLaneAmount = 4;
     [SerializeField] private Transform lanePrefab;
     [SerializeField] private float laneWidth = 3f;
 
     public static List<Transform> Lanes { get; private set; } = new();
-    public static int NumberOfLanes { get; private set; } = 4;
+    public static int NumberOfLanes { get; set; } = 4;
+    public static int StartLaneAmount { get; set; } = 4;
+    public void SetStartLaneAmount(string value) => StartLaneAmount = int.Parse(value);
     #endregion
 
-    private void Awake()
+    private void OnEnable()
     {
-        NumberOfLanes = startLaneAmount;
+        GameController.OnGameStart += GameController_OnGameStart;
+        GreenPowerup.OnGreenPowerup += AddLane;
+    }
 
-        // Based on the amount of lanes a
+    private void OnDisable()
+    {
+        GameController.OnGameStart -= GameController_OnGameStart;
+        GreenPowerup.OnGreenPowerup -= AddLane;
+    }
+
+    private void GameController_OnGameStart()
+    {
+        NumberOfLanes = StartLaneAmount;
+
         Vector3 initialPosition = new(-((NumberOfLanes - 1) * laneWidth) / 2f, -0.5f, 0f);
 
         // Instantiate lanes based on the number of lanes
@@ -37,10 +50,6 @@ public class LaneManager : MonoBehaviour
             Lanes.Add(lane);
         }
     }
-
-    private void OnEnable() => GreenPowerup.OnGreenPowerup += AddLane;
-
-    private void OnDisable() => GreenPowerup.OnGreenPowerup -= AddLane;
 
     /// <summary>
     /// Instantiates a lane on the side the player is closest to.
@@ -82,10 +91,6 @@ public class LaneManager : MonoBehaviour
             Lanes.Add(newLane);
         }
     }
-    public void RemoveLane()
-    {
-        NumberOfLanes--;
-    }
 
     /// <summary>
     /// Checks whether there is currently an obstacle at the provided index.
@@ -113,6 +118,12 @@ public class LaneManager : MonoBehaviour
         targetPosition.x = GetLaneX(targetLane);
         return targetPosition;
     }
+
+    /// <summary>
+    /// Return the world X position of the provided integer.
+    /// </summary>
+    /// <param name="laneInt"></param>
+    /// <returns></returns>
     public static float GetLaneX(int laneInt)
     {
         if (!LaneExists(laneInt))
@@ -144,6 +155,10 @@ public class LaneManager : MonoBehaviour
         return -1;
     }
 
+    /// <summary>
+    /// Return a randomly generated integer of an existing lane.
+    /// </summary>
+    /// <returns></returns>
     public static int GetRandomLaneInt()
     {
         return Random.Range(0, NumberOfLanes);
@@ -215,7 +230,7 @@ public class LaneManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        NumberOfLanes = startLaneAmount;
+        NumberOfLanes = StartLaneAmount;
         Lanes.Clear();
         Lanes = new();
     }

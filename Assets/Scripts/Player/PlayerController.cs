@@ -38,7 +38,6 @@ public class PlayerController : MonoBehaviour
     public static Action OnSwitchedLane; // Reached a new lane.
 
 
-    #region Initiation
     private void Awake()
     {
         if (Singleton)
@@ -48,49 +47,38 @@ public class PlayerController : MonoBehaviour
         }
 
         Singleton = this;
+
         _rb = GetComponent<Rigidbody>();
         _playerInput = new();
     }
-    private void Start()
-    {
-        _currentTargetX = LaneManager.GetLaneX(CurrentLaneInt);
-        _rb.position = LaneManager.GetTargetLanePosition(_rb.position, CurrentLaneInt);
-    }
 
-    private void OnEnable() => GameController.OnGameStart += OnGameStart;
-
+    private void OnEnable() => GameController.OnGameStart += GameController_OnGameStart;
     private void OnDisable()
     {
         _playerInput.Disable();
 
-        // Events
-        GameController.OnGameStart -= OnGameStart;
+        GameController.OnGameStart -= GameController_OnGameStart;
 
-        // Input reading
-        _playerInput.Standard.SwitchLane.started -= ctx => OnSwitchLane(ctx);
-        _playerInput.Standard.Dash.started -= ctx => OnDash(ctx);
+        _playerInput.Standard.SwitchLane.started -= ctx => HandleLaneSwitchInput(ctx);
+        _playerInput.Standard.Dash.started -= ctx => HandleDashInput(ctx);
     }
-    #endregion
 
     /// <summary>
     /// Called when the 'GameStarted' value in the Game Controller is set to true.
     /// </summary>
-    private void OnGameStart()
+    private void GameController_OnGameStart()
     {
+        // Start lane position
+        CurrentLaneInt = Mathf.CeilToInt((float)(LaneManager.NumberOfLanes - 1) / 2);
+        _currentTargetX = LaneManager.GetLaneX(CurrentLaneInt);
+        _rb.position = LaneManager.GetTargetLanePosition(_rb.position, CurrentLaneInt);
+
         // Enable Input Reading
         _playerInput.Enable();
-        _playerInput.Standard.SwitchLane.started += ctx => OnSwitchLane(ctx);
-        _playerInput.Standard.Dash.started += ctx => OnDash(ctx);
+        _playerInput.Standard.SwitchLane.started += ctx => HandleLaneSwitchInput(ctx);
+        _playerInput.Standard.Dash.started += ctx => HandleDashInput(ctx);
     }
 
-    private void OnDash(InputAction.CallbackContext ctx)
-    {
-        if (!_dashing && !_dashCooldown)
-        {
-            _dashing = true;
-            _dashTimer = Time.time + dashDuration;
-        }
-    }
 
     private void Update()
     {
@@ -138,7 +126,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnSwitchLane(InputAction.CallbackContext ctx)
+    /// <summary>
+    /// Handles what happens upon player input to switch lane.
+    /// </summary>
+    /// <param name="ctx">The player's input</param>
+    private void HandleLaneSwitchInput(InputAction.CallbackContext ctx)
     {
         if (!GameController.GameStarted || PauseMenu.isPaused) return;
 
@@ -146,6 +138,25 @@ public class PlayerController : MonoBehaviour
         TrySwitchLane(input);
     }
 
+    /// <summary>
+    /// Handles what happens upon player input to dash forward.
+    /// </summary>
+    /// <param name="ctx">The player's input</param>
+    private void HandleDashInput(InputAction.CallbackContext ctx)
+    {
+        if (!GameController.GameStarted || PauseMenu.isPaused) return;
+        
+        if (!_dashing && !_dashCooldown)
+        {
+            _dashing = true;
+            _dashTimer = Time.time + dashDuration;
+        }
+    }
+
+    /// <summary>
+    /// Switches lane if possible.
+    /// </summary>
+    /// <param name="input">The direction input. -1 == left : 1 == right</param>
     private void TrySwitchLane(int input)
     {
         // If the lane switch attempt is valid...

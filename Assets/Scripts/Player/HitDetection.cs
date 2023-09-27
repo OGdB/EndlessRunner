@@ -9,10 +9,10 @@ public class HitDetection : MonoBehaviour
     [SerializeField] private float immunityLength = 3f;
     [SerializeField] private float blinkIntervalSpeed = 0.6f;
     [SerializeField] private float alphaOnBlink = 0.4f;
-    private bool _blinking = false;
 
     private MeshRenderer _playerRenderer;
     private Material _playerMaterial;
+    private bool _immune = false;
 
     private void Awake()
     {
@@ -22,13 +22,19 @@ public class HitDetection : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer("Interactable"))
+        bool isInteractable = other.gameObject.layer == LayerMask.NameToLayer("Interactable");
+        if (isInteractable)
         {
-            other.TryGetComponent(out InteractableBlock obstacle);
-            if (obstacle != null)
+            other.TryGetComponent(out InteractableBlock interactable);
+            if (interactable != null)
             {
-                obstacle.InteractEffect();
-                OnObstacleHit();
+                interactable.InteractEffect();
+
+                bool isObstacle = interactable.GetType().IsSubclassOf(typeof(GreyObstacle)) || interactable.GetType() == typeof(GreyObstacle);
+                if (isObstacle && !_immune)
+                {
+                    OnObstacleHit();
+                }
             }
             else
             {
@@ -39,12 +45,16 @@ public class HitDetection : MonoBehaviour
 
     private void OnObstacleHit()
     {
-        if (!_blinking)
+        if (!_immune)
+        {
             _ = StartCoroutine(BlinkEffectCR());
+
+            GameController.Lives--;
+        }
 
         IEnumerator BlinkEffectCR()
         {
-            _blinking = true;
+            _immune = true;
             float timer = 0;
             WaitForSeconds blinkInterval = new(blinkIntervalSpeed);
 
@@ -57,7 +67,7 @@ public class HitDetection : MonoBehaviour
             {
                 timer += Time.time - timeStamp;
 
-                _playerMaterial.SetColor("_BaseColor", nextColor);
+                _playerRenderer.material.color = nextColor;
 
                 yield return blinkInterval;
 
@@ -65,7 +75,7 @@ public class HitDetection : MonoBehaviour
             }
 
             _playerMaterial.color = startColor;
-            _blinking = false;
+            _immune = false;
         }
     }
 }

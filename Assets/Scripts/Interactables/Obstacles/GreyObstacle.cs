@@ -19,13 +19,6 @@ public class GreyObstacle : InteractableBlock
     }
     protected virtual void OnDisable() => RedPowerup.OnRedPowerup -= OnRedPowerup;
 
-    public override void InteractEffect()
-    {
-        base.InteractEffect();
-
-        GameController.Lives--;
-    }
-
     /// <summary>
     /// Invoked when the player picks up the Red powerup. Destroys this block if it's on the same lane as the player.
     /// </summary>
@@ -34,7 +27,6 @@ public class GreyObstacle : InteractableBlock
         // If on the same lane as the player, destroy (if within X distance?)
         if (CurrentLaneInt == PlayerController.CurrentLaneInt)
         {
-            print("On the same lane.");
             Destroy(gameObject);
         }
     }

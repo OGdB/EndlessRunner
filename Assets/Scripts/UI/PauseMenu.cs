@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Standard pause screen script that should have most functionalities you need for pause screens.
@@ -27,7 +26,8 @@ public class PauseMenu : MonoBehaviour
     }
     private void OnDisable()
     {
-        PlayerController._playerInput.Standard.Pause.started -= _ => SwitchPauseState();
+        if (PlayerController._playerInput != null)
+            PlayerController._playerInput.Standard.Pause.started -= _ => SwitchPauseState();
     }
 
     /// <summary>
@@ -36,7 +36,6 @@ public class PauseMenu : MonoBehaviour
     public void SwitchPauseState()
     {
         StopAllCoroutines();
-        // Not bothering to store in variable due to infrequent need of variable.
         CanvasGroup canvas = GetComponentInChildren<CanvasGroup>();
         StartCoroutine(SwitchPauseScreenCR(canvas, appearSpeed));
     }
@@ -44,20 +43,7 @@ public class PauseMenu : MonoBehaviour
     public void RestartLevel()
     {
         isPaused = false;
-        //int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-        //SceneManager.LoadScene(currentSceneIndex);
-        SceneManager.LoadScene("LoadScene");
-        GameController.OnGameRestart?.Invoke();
-        Time.timeScale = 1f;
-    }
-
-    public static void QuitGame()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-    Application.Quit();
-#endif
+        GameController.RestartLevel();
     }
 
     private IEnumerator SwitchPauseScreenCR(CanvasGroup canvas, float speed)

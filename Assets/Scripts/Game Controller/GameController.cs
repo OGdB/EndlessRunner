@@ -2,7 +2,12 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Responsible for 'general' fields such as score, lives and playtime.
+/// Also contains the functionality for game start, restart and quit actions.
+/// </summary>
 [DefaultExecutionOrder(0)]
 public class GameController : MonoBehaviour
 {
@@ -10,7 +15,6 @@ public class GameController : MonoBehaviour
     private static GameController Singleton;
     public static bool GameStarted { get; private set; } = false;
 
-    [SerializeField] private GameObject startCanvas;
     [SerializeField] private TextMeshProUGUI countdownTimerText;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI livesText;
@@ -22,46 +26,8 @@ public class GameController : MonoBehaviour
     private static double _startTime = 0;
     private static double _endTime = 0;
 
-    public static Action OnGameStart;
-    public static Action OnGameOver;
-    public static Action OnGameRestart;
-
-
-    public static void StartGame()
-    {
-        Singleton.StartCoroutine(CountdownCR());
-
-        static IEnumerator CountdownCR()
-        {
-            OnGameStart?.Invoke();
-
-            Singleton.countdownTimerText.gameObject.SetActive(true);
-
-            WaitForSeconds second = new(1f);
-            int timeLeft = 3;
-
-            while (timeLeft > 0)
-            {
-                timeLeft--;
-                yield return second;
-                Singleton.countdownTimerText.SetText(timeLeft.ToString());
-            }
-
-            Singleton.startCanvas.SetActive(false);
-
-            GameStarted = true;
-            _startTime = Time.time;
-        }
-    }
-    public static void GameOver()
-    {
-        GameStarted = false;
-        _endTime = Time.time;
-        _totalTime = _endTime - _startTime;
-        Singleton.timeText.SetText($"Time: {_totalTime}");
-
-        OnGameOver?.Invoke();
-    }
+    public static Action OnGameStart { get; set; }
+    public static Action OnGameOver { get; set; }
     public static int Score
     {
         get => _score; set
@@ -89,8 +55,6 @@ public class GameController : MonoBehaviour
             Singleton.timeText.SetText($"Time: {TotalTime}");
         }
     }
-
-
     #endregion
 
     private void Awake()
@@ -102,9 +66,6 @@ public class GameController : MonoBehaviour
         }
 
         Singleton = this;
-
-        if (LevelGenerator.Seed != default)
-            StartGame();
     }
 
     private void Start()
@@ -126,5 +87,54 @@ public class GameController : MonoBehaviour
         _score = 0;
 
         StopAllCoroutines();
+    }
+
+    public static void StartGame()
+    {
+        Singleton.StartCoroutine(CountdownCR());
+
+        static IEnumerator CountdownCR()
+        {
+            OnGameStart?.Invoke();
+
+            Singleton.countdownTimerText.gameObject.SetActive(true);
+
+            WaitForSeconds second = new(1f);
+            int timeLeft = 3;
+
+            while (timeLeft > 0)
+            {
+                timeLeft--;
+                yield return second;
+                Singleton.countdownTimerText.SetText(timeLeft.ToString());
+            }
+
+            Singleton.countdownTimerText.gameObject.SetActive(false);
+            GameStarted = true;
+            _startTime = Time.time;
+        }
+    }
+    public static void RestartLevel()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("LoadScene");
+    }
+    public static void GameOver()
+    {
+        GameStarted = false;
+        _endTime = Time.time;
+        _totalTime = _endTime - _startTime;
+        Singleton.timeText.SetText($"Time: {_totalTime:F2}");
+        Time.timeScale = 0;
+
+        OnGameOver?.Invoke();
+    }
+    public static void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+    Application.Quit();
+#endif
     }
 }
