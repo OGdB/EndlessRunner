@@ -29,6 +29,9 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField, Range(0, 1f)] private float blueObstacleChance = 0.3f; // Probability for blue obstacle
 
     [Header("Powerups")]
+    [Tooltip("The MINIMUM amount of rows before a new powerup can spawn.")]
+    [SerializeField] private int powerupSpawnRate = 6;
+    [SerializeField] private float powerupSpawnChance = 0.5f;
     [SerializeField] private GreenPowerup greenPowerup;
     [SerializeField] private RedPowerup redPowerup;
 
@@ -42,6 +45,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private TMPro.TMP_InputField distToFirstRowInput;
     [SerializeField] private TMPro.TMP_InputField distBetweenRowsInput;
 
+    private static int _numberOfRows = 0;
     private static int _numberOfGeneratedObstacles = 0;
 
     private static Transform _obstacleParent;
@@ -50,6 +54,8 @@ public class LevelGenerator : MonoBehaviour
     private static Queue<InteractableBlock> _greyObstaclesPool = new();
     private static Queue<InteractableBlock> _blueObstaclesPool = new();
     private static Queue<InteractableBlock> _orangeObstaclesPool = new();
+    private static Queue<InteractableBlock> _greenPowerupPool = new();
+    private static Queue<InteractableBlock> _redPowerupPool = new();
 
     public void SetNumberOfVisibleObstacleRows(string value) => CurrentLevelSettings.numberOfVisibleObstacleRows = int.Parse(value);
     public void SetDistanceToFirstRow(string value) => CurrentLevelSettings.distanceToFirstRow = float.Parse(value);
@@ -79,12 +85,15 @@ public class LevelGenerator : MonoBehaviour
         _obstacleParent = new GameObject("Obstacles").transform;
         _powerupsParent = new GameObject("Powerups").transform;
 
-        // Populate the obstacle pools
+        // Populate the pools
         for (int i = 0; i < 12; i++)
         {
-            InstantiatePoolInstance(greyObstacle, _greyObstaclesPool);
-            InstantiatePoolInstance(blueObstacle, _blueObstaclesPool);
-            InstantiatePoolInstance(orangeObstacle, _orangeObstaclesPool);
+            InstantiatePoolInstance(greyObstacle, _greyObstaclesPool, _obstacleParent);
+            InstantiatePoolInstance(blueObstacle, _blueObstaclesPool, _obstacleParent);
+            InstantiatePoolInstance(orangeObstacle, _orangeObstaclesPool, _obstacleParent);
+
+            InstantiatePoolInstance(greenPowerup, _greenPowerupPool, _powerupsParent);
+            InstantiatePoolInstance(redPowerup, _redPowerupPool, _powerupsParent);
         }
     }
     private void Start()
@@ -104,12 +113,12 @@ public class LevelGenerator : MonoBehaviour
     }
     private void OnEnable()
     {
-        BlockCleaner.PassedObstacleLine += SpawnNextObstacleLine;
+        BlockCleaner.PassedObstacleLine += BlockCleaner_PassedObstacleLine;
         GameController.OnGameStart += GameController_OnGameStart;
     }
     private void OnDisable()
     {
-        BlockCleaner.PassedObstacleLine -= SpawnNextObstacleLine;
+        BlockCleaner.PassedObstacleLine -= BlockCleaner_PassedObstacleLine;
         GameController.OnGameStart -= GameController_OnGameStart;
     }
 
@@ -129,18 +138,30 @@ public class LevelGenerator : MonoBehaviour
         // First line spawns at 'distanceUntilFirstObstacle' distance. From there, it follows the rule.
         for (int i = 0; i < CurrentLevelSettings.numberOfVisibleObstacleRows; i++)
         {
-            SpawnObstacleLine(_nextRowZPos);
+            SpawnObstacleRow(_nextRowZPos);
             _nextRowZPos += CurrentLevelSettings.distanceBetweenRows;
         }
     }
 
-    private void SpawnNextObstacleLine()
+    /// <summary>
+    /// Invoked when the player passed a row of obstacles.
+    /// </summary>
+    private void BlockCleaner_PassedObstacleLine()
     {
-        SpawnObstacleLine(_nextRowZPos);
+        SpawnObstacleRow(_nextRowZPos);
+        _numberOfRows++;
+
+        if (_numberOfGeneratedObstacles >= powerupSpawnRate && Random.value < powerupSpawnChance)
+        {
+            // Placing powerups in-between obstacle rows.
+            float zPosition = _nextRowZPos + CurrentLevelSettings.distanceBetweenRows / 2f;
+            SpawnPowerup(zPosition);
+        }
+
         _nextRowZPos += CurrentLevelSettings.distanceBetweenRows;
     }
 
-    private void SpawnObstacleLine(float zPosition)
+    private void SpawnObstacleRow(float zPosition)
     {
         // More obstacles
         int amountOfObstacles = Random.Range(Mathf.FloorToInt(LaneManager.NumberOfLanes * 0.7f), Mathf.FloorToInt(LaneManager.NumberOfLanes * rowObstaclePercentage));
@@ -158,6 +179,14 @@ public class LevelGenerator : MonoBehaviour
             obstacle.gameObject.SetActive(true);
         }
     }
+    private void SpawnPowerup(float zPosition)
+    {
+        InteractableBlock powerup = GetRandomPowerup();
+        float LaneX = LaneManager.GetRandomLane(out int LaneInt);
+        powerup.CurrentLaneInt = LaneInt;
+        powerup.SetPosition(new(LaneX, 0, zPosition));
+        powerup.gameObject.SetActive(true);
+    }
 
     /// <summary>
     /// Exports the current level generation settings to a JSON file.
@@ -170,19 +199,32 @@ public class LevelGenerator : MonoBehaviour
 
         if (randomValue < greyObstacleChance)
         {
-            return DequeueFromPool(_greyObstaclesPool, greyObstacle);
+            return DequeueFromPool(_greyObstaclesPool, greyObstacle, _obstacleParent);
         }
         else if (randomValue < greyObstacleChance + blueObstacleChance)
         {
-            return DequeueFromPool(_blueObstaclesPool, blueObstacle);
+            return DequeueFromPool(_blueObstaclesPool, blueObstacle, _obstacleParent);
         }
         else
         {
-            return DequeueFromPool(_orangeObstaclesPool, orangeObstacle);
+            return DequeueFromPool(_orangeObstaclesPool, orangeObstacle, _obstacleParent);
+        }
+    }
+    private InteractableBlock GetRandomPowerup()
+    {
+        float randomValue = Random.value;
+
+        if (randomValue < 0.5f)
+        {
+            return DequeueFromPool(_greenPowerupPool, greenPowerup, _powerupsParent);
+        }
+        else
+        {
+            return DequeueFromPool(_redPowerupPool, redPowerup, _powerupsParent);
         }
     }
 
-    private static InteractableBlock DequeueFromPool(Queue<InteractableBlock> pool, InteractableBlock original)
+    private static InteractableBlock DequeueFromPool(Queue<InteractableBlock> pool, InteractableBlock original, Transform parent)
     {
         if (pool.Count > 0)
         {
@@ -193,10 +235,10 @@ public class LevelGenerator : MonoBehaviour
         {
             for (int i = 0; i < 5; i++)
             {
-                InstantiatePoolInstance(original, pool);
+                InstantiatePoolInstance(original, pool, parent);
             }
 
-            return Instantiate(original, _obstacleParent);
+            return Instantiate(original, parent);
         }
     }
 
@@ -223,9 +265,9 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    private static void InstantiatePoolInstance(InteractableBlock original, Queue<InteractableBlock> pool)
+    private static void InstantiatePoolInstance(InteractableBlock original, Queue<InteractableBlock> pool, Transform parent)
     {
-        InteractableBlock instance = Instantiate(original, _obstacleParent);
+        InteractableBlock instance = Instantiate(original, parent);
         instance.name = $"{original.GetType().Name} {_numberOfGeneratedObstacles}";
         instance.gameObject.SetActive(false);
         pool.Enqueue(instance);
@@ -234,15 +276,22 @@ public class LevelGenerator : MonoBehaviour
 
     private void OnDestroy()
     {
+        _greyObstaclesPool.Clear();
+        _greyObstaclesPool = new();
+
+        _blueObstaclesPool.Clear();
+        _blueObstaclesPool = new();
+
+        _orangeObstaclesPool.Clear();
+        _orangeObstaclesPool = new();
+
+        _greenPowerupPool.Clear();
+        _greenPowerupPool = new();
+
+        _redPowerupPool.Clear();
+        _redPowerupPool = new();
+
         _obstacleParent = null;
         _powerupsParent = null;
-
-        _greyObstaclesPool.Clear();
-        _blueObstaclesPool.Clear();
-        _orangeObstaclesPool.Clear();
-
-        _greyObstaclesPool = new();
-        _blueObstaclesPool = new();
-        _orangeObstaclesPool = new();
     }
 }
