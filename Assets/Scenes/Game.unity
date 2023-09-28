@@ -854,7 +854,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 27.400024, y: -24}
+  m_AnchoredPosition: {x: 27.399902, y: -24}
   m_SizeDelta: {x: 300, y: 162.1173}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &203738788
@@ -1209,7 +1209,7 @@ MonoBehaviour:
   orangeObstacle: {fileID: 3331422409310284404, guid: 2e72755183d950949aa06bb74ef8f8fa, type: 3}
   greyObstacleChance: 0.5
   blueObstacleChance: 0.25
-  powerupSpawnRate: 6
+  powerupSpawnRate: 10
   powerupSpawnChance: 0.5
   greenPowerup: {fileID: 8061658001840392212, guid: 5f7fd8477ab0f7f4f814fcba126be7ec, type: 3}
   redPowerup: {fileID: 1021094231479427455, guid: 11a11c93930bbf3468cd81f552b8c7a7, type: 3}
@@ -3954,7 +3954,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!224 &1009418004
 RectTransform:
@@ -8177,7 +8177,7 @@ GameObject:
   - component: {fileID: 1937365585}
   - component: {fileID: 1937365586}
   m_Layer: 0
-  m_Name: Lanes [Script]
+  m_Name: Lane Manager [Script]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

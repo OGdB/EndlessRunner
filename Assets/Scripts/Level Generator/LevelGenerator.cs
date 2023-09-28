@@ -11,6 +11,9 @@ using UnityEngine.UI;
 public class LevelGenerator : MonoBehaviour
 {
     #region Variables & Properties    
+    /// <summary>
+    /// The current level generation settings.
+    /// </summary>
     public static LevelGenerationSettings CurrentLevelSettings = null;
 
     private static bool IsFirstTimeLoading = true;
@@ -31,6 +34,7 @@ public class LevelGenerator : MonoBehaviour
     [Header("Powerups")]
     [Tooltip("The MINIMUM amount of rows before a new powerup can spawn.")]
     [SerializeField] private int powerupSpawnRate = 6;
+    [Tooltip("The chance for a powerup to appear in a row, after its 'cooldown' period")]
     [SerializeField] private float powerupSpawnChance = 0.5f;
     [SerializeField] private GreenPowerup greenPowerup;
     [SerializeField] private RedPowerup redPowerup;
@@ -158,12 +162,16 @@ public class LevelGenerator : MonoBehaviour
             // Placing powerups in-between obstacle rows.
             _nextPowerupThreshold += powerupSpawnRate;
             float zPosition = _nextRowZPos + CurrentLevelSettings.distanceBetweenRows / 2f;
-            SpawnPowerup(zPosition);
+            SpawnPowerupOnRandomLane(zPosition);
         }
 
         _nextRowZPos += CurrentLevelSettings.distanceBetweenRows;
     }
 
+    /// <summary>
+    /// Spawn a row of obstacles at the provided Z position.
+    /// </summary>
+    /// <param name="zPosition">The z-position of the row</param>
     private void SpawnObstacleRow(float zPosition)
     {
         // More obstacles
@@ -182,7 +190,12 @@ public class LevelGenerator : MonoBehaviour
             obstacle.gameObject.SetActive(true);
         }
     }
-    private void SpawnPowerup(float zPosition)
+
+    /// <summary>
+    /// Spawns a single powerup at the z Position on a random lane.
+    /// </summary>
+    /// <param name="zPosition"></param>
+    private void SpawnPowerupOnRandomLane(float zPosition)
     {
         InteractableBlock powerup = GetRandomPowerup();
         float LaneX = LaneManager.GetRandomLane(out int LaneInt);
@@ -196,6 +209,10 @@ public class LevelGenerator : MonoBehaviour
     /// </summary>
     public void ExportLevelSettings() => CurrentLevelSettings.ExportToJson();
 
+    /// <summary>
+    /// Return a random obstacle from a pool.
+    /// </summary>
+    /// <returns>The random obstacle</returns>
     private InteractableBlock GetRandomObstacle()
     {
         float randomValue = Random.value;
@@ -213,6 +230,10 @@ public class LevelGenerator : MonoBehaviour
             return DequeueFromPool(_orangeObstaclesPool, orangeObstacle, _obstacleParent);
         }
     }
+    /// <summary>
+    /// Return a random powerup from a pool.
+    /// </summary>
+    /// <returns>The random obstacle</returns>
     private InteractableBlock GetRandomPowerup()
     {
         float randomValue = Random.value;
@@ -227,6 +248,13 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Dequeue an object from a pool. Re-populates the pool if it is empty.
+    /// </summary>
+    /// <param name="pool">The pool to retrieve from</param>
+    /// <param name="original">the prefab found in the pool.</param>
+    /// <param name="parent">The parent in the scene hierarchy</param>
+    /// <returns></returns>
     private static InteractableBlock DequeueFromPool(Queue<InteractableBlock> pool, InteractableBlock original, Transform parent)
     {
         if (pool.Count > 0)
@@ -245,6 +273,11 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Return a pool object to its pool.
+    /// </summary>
+    /// <param name="go"></param>
+    /// <param name="pool"></param>
     private static void EnqueueObject(InteractableBlock go, Queue<InteractableBlock> pool)
     {
         go.gameObject.SetActive(false);
@@ -252,6 +285,10 @@ public class LevelGenerator : MonoBehaviour
         pool.Enqueue(go);
     }
 
+    /// <summary>
+    /// Finds the correct pool of an interactable and returns it to it.
+    /// </summary>
+    /// <param name="interactableBlock"></param>
     public static void EnqueueInteractable(InteractableBlock interactableBlock)
     {
         if (interactableBlock is GreyObstacle greyObstacle)
@@ -265,6 +302,14 @@ public class LevelGenerator : MonoBehaviour
         else if (interactableBlock is OrangeObstacle orangeObstacle)
         {
             EnqueueObject(orangeObstacle, _orangeObstaclesPool);
+        }
+        else if (interactableBlock is GreenPowerup greenPowerup)
+        {
+            EnqueueObject(greenPowerup, _greenPowerupPool);
+        }
+        else if (interactableBlock is RedPowerup redPowerup)
+        {
+            EnqueueObject(redPowerup, _redPowerupPool);
         }
     }
 

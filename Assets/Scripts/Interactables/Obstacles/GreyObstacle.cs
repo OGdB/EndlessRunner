@@ -14,21 +14,21 @@ public class GreyObstacle : InteractableBlock
     protected override void OnEnable()
     {
         base.OnEnable();
-
-        RedPowerup.OnRedPowerup += RedPowerup_OnRedPowerup;
+        RedPowerup.OnRedPowerup += iad => RedPowerup_OnRedPowerup(iad);
     }
     protected override void OnDisable()
     {
-        RedPowerup.OnRedPowerup -= RedPowerup_OnRedPowerup;
+        base.OnDisable();
+        RedPowerup.OnRedPowerup -= redLaneInt => RedPowerup_OnRedPowerup(redLaneInt);
     }
 
     /// <summary>
     /// Invoked when the player picks up the Red powerup. Destroys this block if it's on the same lane as the player.
     /// </summary>
-    protected void RedPowerup_OnRedPowerup()
+    protected void RedPowerup_OnRedPowerup(int redLaneInt)
     {
         // If on the same lane as the player, destroy (if within X distance?)
-        if (CurrentLaneInt == PlayerController.CurrentLaneInt)
+        if (CurrentLaneInt == redLaneInt)
         {
             LevelGenerator.EnqueueInteractable(this);
         }

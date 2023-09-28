@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3720849412627936634}
   - component: {fileID: 8291257086048845645}
   m_Layer: 6
-  m_Name: Mesh+Collider
+  m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -154,9 +154,9 @@ Rigidbody:
   m_ImplicitTensor: 0
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 126
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!65 &8657991011198973327
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -2,19 +2,14 @@ using System;
 
 public class RedPowerup : InteractableBlock
 {
-    public static event Action OnRedPowerup;
+    public static event Action<int> OnRedPowerup;
 
     public override void InteractEffect()
     {
         base.InteractEffect();
 
-        OnRedPowerup?.Invoke();
+        OnRedPowerup?.Invoke(CurrentLaneInt);
 
-        Disable();
-    }
-
-    private void Disable()
-    {
         gameObject.SetActive(false);
     }
 }

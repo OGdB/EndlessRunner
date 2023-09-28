@@ -7,6 +7,7 @@ using UnityEngine;
 public class HitDetection : MonoBehaviour
 {
     [SerializeField] private float immunityLength = 3f;
+    [SerializeField, Range(0.1f, 1f)] private float speedMultiplierOnObstacleHit = 0.6f;
     [SerializeField] private float blinkIntervalSpeed = 0.6f;
     [SerializeField] private float alphaOnBlink = 0.4f;
 
@@ -20,6 +21,28 @@ public class HitDetection : MonoBehaviour
         _playerMaterial = _playerRenderer.sharedMaterial;
     }
 
+/*    private void OnCollisionEnter(Collision collision)
+    {
+        bool isInteractable = collision.gameObject.layer == LayerMask.NameToLayer("Interactable");
+        if (isInteractable)
+        {
+            collision.gameObject.TryGetComponent(out InteractableBlock interactable);
+            if (interactable != null)
+            {
+                interactable.InteractEffect();
+
+                bool isObstacle = interactable.GetType().IsSubclassOf(typeof(GreyObstacle)) || interactable.GetType() == typeof(GreyObstacle);
+                if (isObstacle && !_immune)
+                {
+                    OnObstacleHit();
+                }
+            }
+            else
+            {
+                Debug.LogWarning("Hit a gameobject on obstacle layer without obstacle script");
+            }
+        }
+    }*/
     private void OnTriggerEnter(Collider other)
     {
         bool isInteractable = other.gameObject.layer == LayerMask.NameToLayer("Interactable");
@@ -63,6 +86,8 @@ public class HitDetection : MonoBehaviour
             nextColor.a = alphaOnBlink;
             float timeStamp = Time.time;
 
+            PlayerController.SpeedMultiplier = speedMultiplierOnObstacleHit;
+
             while (timer <= immunityLength)
             {
                 timer += Time.time - timeStamp;
@@ -73,6 +98,8 @@ public class HitDetection : MonoBehaviour
 
                 nextColor.a = nextColor.a == alphaOnBlink ? 1f : alphaOnBlink;
             }
+
+            PlayerController.SpeedMultiplier = 1f;
 
             _playerMaterial.color = startColor;
             _immune = false;

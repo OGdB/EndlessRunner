@@ -12,13 +12,18 @@ public class LevelGenerationSettings
     public int startNumberOfLanes = 3;
     public int seed;
 
-    public LevelGenerationSettings(int numberOfVisibleObstacleRows = default, float distanceToFirstRow = default, float distanceBetweenRows = default, float greyObstacleChance = default, float blueObstacleChance = default, int startNumberOfLanes = default, int seed = default)
+    public LevelGenerationSettings(int numberOfVisibleObstacleRows = 10,
+                                   float distanceToFirstRow = 15,
+                                   float distanceBetweenRows = 7.5f,
+                                   int startNumberOfLanes = 3,
+                                   int seed = default)
     {
         this.numberOfVisibleObstacleRows = numberOfVisibleObstacleRows;
         this.distanceToFirstRow = distanceToFirstRow;
         this.distanceBetweenRows = distanceBetweenRows;
-        this.seed = seed;
         this.startNumberOfLanes = startNumberOfLanes;
+        if (seed == default) seed = Random.Range(0, int.MaxValue);
+        this.seed = seed;
     }
 
     public void ExportToJson()
@@ -56,8 +61,18 @@ public class LevelGenerationSettings
         }
         else
         {
-            Debug.LogWarning("Error: JSON file does not exist.");
-            return null;
+            string directoryPath = Path.GetDirectoryName(SAVEPATH);
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            LevelGenerationSettings settings = new();
+            string json = JsonUtility.ToJson(settings);
+            File.WriteAllText(SAVEPATH, json);
+
+            Debug.LogWarning("No JSON file at filepath, generating new.");
+            return settings;
         }
     }
 

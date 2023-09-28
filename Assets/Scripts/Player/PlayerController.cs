@@ -12,10 +12,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float sideMovementSpeed = 1f;
     [SerializeField] private float forwardMovementSpeed = 1f;
     [SerializeField] private float dashSpeedMultiplier = 2f;
-
     [Header("Dash Settings")]
     [SerializeField] private float dashDuration = 1f;
     [SerializeField] private float dashCooldownDuration = 1f;
+    public static float SpeedMultiplier { get; set; } = 1f;  // A common multiplier applied to the player's speed.
 
     private float _currentTargetX;
     private bool _dashing = false;
@@ -51,7 +51,6 @@ public class PlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _playerInput = new();
     }
-
     private void OnEnable() => GameController.OnGameStart += GameController_OnGameStart;
     private void OnDisable()
     {
@@ -95,9 +94,9 @@ public class PlayerController : MonoBehaviour
         {
             Vector3 currentPos = _rb.position;
 
-            float step = (_dashing ? ForwardMovementSpeed * dashSpeedMultiplier : ForwardMovementSpeed) * Time.deltaTime;
+            float step = (_dashing ? ForwardMovementSpeed * dashSpeedMultiplier : ForwardMovementSpeed) * SpeedMultiplier;
             float targetZ = currentPos.z + 1f;
-            float curZ = Mathf.MoveTowards(_rb.position.z, targetZ, step);
+            float curZ = Mathf.MoveTowards(_rb.position.z, targetZ, step * Time.deltaTime);
 
             currentPos.z = curZ;
             _rb.MovePosition(currentPos);
@@ -178,6 +177,7 @@ public class PlayerController : MonoBehaviour
     private void OnDestroy()
     {
         CurrentLaneInt = 1;
+        SpeedMultiplier = 1f;
         _playerInput = null;
         Singleton = null;
     }

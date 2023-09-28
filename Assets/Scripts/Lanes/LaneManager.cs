@@ -193,7 +193,7 @@ public class LaneManager : MonoBehaviour
     /// <returns>A random x-position representing a lane.</returns>
     public static float GetRandomLane(out int laneInt)
     {
-        laneInt = UnityEngine.Random.Range(0, Lanes.Count - 1);
+        laneInt = UnityEngine.Random.Range(0, Lanes.Count);
         float randomX = GetLaneX(laneInt);
         return randomX;
     }

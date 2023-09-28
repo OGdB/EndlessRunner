@@ -30,7 +30,7 @@ public class BlueObstacle : GreyObstacle
         _movementTimer = Random.Range(0f, movementIntervalSeconds);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         Vector3 currentPosition = transform.position;
 
@@ -62,6 +62,16 @@ public class BlueObstacle : GreyObstacle
         transform.position = Vector3.MoveTowards(currentPosition, _targetPosition, movementSpeed * Time.deltaTime);
     }
 
+    /*    private void OnCollisionEnter(Collision collision)
+        {
+            if (transform.position == _targetPosition) return;  // If at target / rest position
+
+            // If colliding with another obstacle, change direction and reset the timer
+            _currentDirectionInt *= -1;
+            CurrentLaneInt = _lastLaneInt;
+            _targetPosition = LaneManager.GetTargetLanePosition(transform.position, CurrentLaneInt);
+
+        }*/
     private void OnTriggerEnter(Collider other)
     {
         if (transform.position == _targetPosition) return;  // If at target / rest position

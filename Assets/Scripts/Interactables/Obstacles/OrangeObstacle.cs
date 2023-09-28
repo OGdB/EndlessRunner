@@ -80,6 +80,16 @@ public class OrangeObstacle : GreyObstacle
         _targetPosition = LaneManager.GetTargetLanePosition(transform.position, CurrentLaneInt);
         _ = StartCoroutine(MoveToLaneCR());
     }
+/*    private void OnCollisionEnter(Collision collision)
+    {
+        // If colliding with another obstacle, restart the coroutine with moving in the other direction.
+        if (!_isMoving) return;  // Don't start moving if it the other block is moving into this block while stationary.
+
+        StopAllCoroutines();
+        CurrentLaneInt = lastLaneInt;
+        _targetPosition = LaneManager.GetTargetLanePosition(transform.position, CurrentLaneInt);
+        _ = StartCoroutine(MoveToLaneCR());
+    }*/
 
     public override void ResetValues()
     {

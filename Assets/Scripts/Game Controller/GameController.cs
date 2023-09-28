@@ -77,19 +77,9 @@ public class GameController : MonoBehaviour
         Lives = _lives;
     }
 
-    private void OnDestroy()
-    {
-        Singleton = null;
-        GameStarted = false;
-        _totalTime = 0;
-        _startTime = 0;
-        _endTime = 0;
-        _lives = 3;
-        _score = 0;
-
-        StopAllCoroutines();
-    }
-
+    /// <summary>
+    /// Starts the game after a countdown has finished.
+    /// </summary>
     public void StartGame()
     {
         StartCoroutine(CountdownCR());
@@ -126,6 +116,7 @@ public class GameController : MonoBehaviour
         GameStarted = false;
         _endTime = Time.time;
         _totalTime = _endTime - _startTime;
+        Score = Mathf.RoundToInt(PlayerController.CurrentDistance);
         Singleton.timeText.SetText($"Time: {_totalTime:F2}");
         Time.timeScale = 0;
 
@@ -138,5 +129,18 @@ public class GameController : MonoBehaviour
 #else
     Application.Quit();
 #endif
+    }
+
+    private void OnDestroy()
+    {
+        Singleton = null;
+        GameStarted = false;
+        _totalTime = 0;
+        _startTime = 0;
+        _endTime = 0;
+        _lives = 3;
+        _score = 0;
+
+        StopAllCoroutines();
     }
 }
