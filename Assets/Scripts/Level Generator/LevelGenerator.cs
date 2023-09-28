@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,8 @@ using UnityEngine.UI;
 public class LevelGenerator : MonoBehaviour
 {
     #region Variables & Properties    
+    public static LevelGenerationSettings CurrentLevelSettings = null;
+
     private static bool IsFirstTimeLoading = true;
 
     [Tooltip("The number of obstacle lines that will be generated and maintained during the game.")]
@@ -29,14 +32,15 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private GreenPowerup greenPowerup;
     [SerializeField] private RedPowerup redPowerup;
 
-    [Header("Start UI")]
-    [SerializeField] private Button startGameButton; 
+    [Header("Start & Settings UI")]
+    [SerializeField] private Button startGameButton;
     [SerializeField] private TMPro.TMP_InputField seedInputField;
+    [SerializeField] private Toggle randomSeedToggle;
+
     [SerializeField] private TMPro.TMP_InputField numberOfStartLanesInput;
     [SerializeField] private TMPro.TMP_InputField visObstRowsInput;
     [SerializeField] private TMPro.TMP_InputField distToFirstRowInput;
     [SerializeField] private TMPro.TMP_InputField distBetweenRowsInput;
-    [SerializeField] private Toggle randomSeedToggle;
 
     private static int _numberOfGeneratedObstacles = 0;
 
@@ -47,11 +51,10 @@ public class LevelGenerator : MonoBehaviour
     private static Queue<InteractableBlock> _blueObstaclesPool = new();
     private static Queue<InteractableBlock> _orangeObstaclesPool = new();
 
-    public static LevelGenerationSettings CurrentLevelSettings = null;
-
     public void SetNumberOfVisibleObstacleRows(string value) => CurrentLevelSettings.numberOfVisibleObstacleRows = int.Parse(value);
     public void SetDistanceToFirstRow(string value) => CurrentLevelSettings.distanceToFirstRow = float.Parse(value);
     public void SetDistanceBetweenRows(string value) => CurrentLevelSettings.distanceBetweenRows = float.Parse(value);
+
 
     /// <summary>
     /// Set the seed to the string input. Used by the inputfield.
@@ -59,24 +62,15 @@ public class LevelGenerator : MonoBehaviour
     /// <param name="input">The input string representing the seed.</param>
     public void SetSeed(string input)
     {
-        if (!randomSeedToggle.isOn)  // If not a randomized seed
+        if (int.TryParse(input, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value))
         {
-            if (int.TryParse(input, out int value))
-            {
-                CurrentLevelSettings.seed = value;
-            }
-            else
-            {
-                Debug.LogWarning("Couldn't parse string input to integer value for seed.");
-                RandomSeed();
-            }
+            CurrentLevelSettings.seed = value;
         }
         else
         {
-            RandomSeed();
+            Debug.LogWarning("Couldn't parse string input to integer value for seed.");
+            CurrentLevelSettings.seed = Random.Range(0, int.MaxValue);
         }
-
-        void RandomSeed() => CurrentLevelSettings.seed = Random.Range(0, int.MaxValue);
     }
     #endregion
 
@@ -99,7 +93,7 @@ public class LevelGenerator : MonoBehaviour
         if (IsFirstTimeLoading)
         {
             IsFirstTimeLoading = false;
-            TryImportLevelSettings();
+            CurrentLevelSettings = LevelGenerationSettings.ImportFromJson();
         }
 
         seedInputField.SetTextWithoutNotify(CurrentLevelSettings.seed.ToString());
@@ -119,33 +113,6 @@ public class LevelGenerator : MonoBehaviour
         GameController.OnGameStart -= GameController_OnGameStart;
     }
 
-    private void TryImportLevelSettings()
-    {
-        CurrentLevelSettings = LevelGenerationSettings.ImportFromJson();
-
-        if (CurrentLevelSettings != null)
-        {
-            SetLevelSettingValues(CurrentLevelSettings);
-        }
-        else
-        {
-            // Invalid settings = Go with default values.
-            CurrentLevelSettings.seed = Random.Range(0, int.MaxValue);
-
-            Notifier.SetNotification("Imported settings were invalid.");
-            Debug.LogWarning("Imported settings are invalid.");
-        }
-    }
-
-    private void SetLevelSettingValues(LevelGenerationSettings _settings)
-    {
-        CurrentLevelSettings.seed = _settings.seed; 
-        Random.InitState(CurrentLevelSettings.seed);
-
-        greyObstacleChance = _settings.greyObstacleChance;
-        blueObstacleChance = _settings.blueObstacleChance;
-    }
-
     private void GameController_OnGameStart()
     {
         // Set the seed based on the input of the inputfield // random seed toggle.
@@ -153,7 +120,9 @@ public class LevelGenerator : MonoBehaviour
         seedInputField.gameObject.SetActive(false);
         randomSeedToggle.gameObject.SetActive(false);
 
-        SetLevelSettingValues(CurrentLevelSettings);
+        if (randomSeedToggle.isOn)
+            CurrentLevelSettings.seed = CurrentLevelSettings.seed = Random.Range(0, int.MaxValue);
+        Random.InitState(CurrentLevelSettings.seed);
 
         _nextRowZPos = CurrentLevelSettings.distanceToFirstRow;
 

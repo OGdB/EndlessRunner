@@ -9,19 +9,14 @@ public class LevelGenerationSettings
     public int numberOfVisibleObstacleRows = 10;
     public float distanceToFirstRow = 15;
     public float distanceBetweenRows = 7.5f;
-    public float greyObstacleChance = 0.5f;
-    public float blueObstacleChance = 0.25f;
     public int startNumberOfLanes = 3;
     public int seed;
 
-    // Constructor
     public LevelGenerationSettings(int numberOfVisibleObstacleRows = default, float distanceToFirstRow = default, float distanceBetweenRows = default, float greyObstacleChance = default, float blueObstacleChance = default, int startNumberOfLanes = default, int seed = default)
     {
         this.numberOfVisibleObstacleRows = numberOfVisibleObstacleRows;
         this.distanceToFirstRow = distanceToFirstRow;
         this.distanceBetweenRows = distanceBetweenRows;
-        this.greyObstacleChance = greyObstacleChance;
-        this.blueObstacleChance = blueObstacleChance;
         this.seed = seed;
         this.startNumberOfLanes = startNumberOfLanes;
     }
@@ -36,7 +31,7 @@ public class LevelGenerationSettings
         {
             Directory.CreateDirectory(directoryPath);
         }
-        Debug.Log($"Save with seed: {this.seed}");
+
         // Write the JSON data to the file
         File.WriteAllText(SAVEPATH, json);
     }
@@ -88,20 +83,6 @@ public class LevelGenerationSettings
         {
             Debug.LogWarning("Invalid distanceBetweenRows: set to default.");
             settings.distanceBetweenRows = 7.5f; // Set a reasonable default value
-            valid = false;
-        }
-
-        if (settings.greyObstacleChance < 0 || settings.greyObstacleChance > 1f)
-        {
-            Debug.LogWarning("Invalid greyObstacleChance: set to default.");
-            settings.greyObstacleChance = 0.5f; // Set a reasonable default value
-            valid = false;
-        }
-
-        if (settings.blueObstacleChance < 0 || settings.blueObstacleChance > 1f)
-        {
-            Debug.LogWarning("Invalid blueObstacleChance: set to default.");
-            settings.blueObstacleChance = 0.25f; // Set a reasonable default value
             valid = false;
         }
 
