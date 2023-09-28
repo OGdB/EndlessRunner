@@ -34,6 +34,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private float powerupSpawnChance = 0.5f;
     [SerializeField] private GreenPowerup greenPowerup;
     [SerializeField] private RedPowerup redPowerup;
+    private int _nextPowerupThreshold;
 
     [Header("Start & Settings UI")]
     [SerializeField] private Button startGameButton;
@@ -57,6 +58,7 @@ public class LevelGenerator : MonoBehaviour
     private static Queue<InteractableBlock> _greenPowerupPool = new();
     private static Queue<InteractableBlock> _redPowerupPool = new();
 
+    public void SetNumberOfStartLanes(string value) => CurrentLevelSettings.startNumberOfLanes = int.Parse(value);
     public void SetNumberOfVisibleObstacleRows(string value) => CurrentLevelSettings.numberOfVisibleObstacleRows = int.Parse(value);
     public void SetDistanceToFirstRow(string value) => CurrentLevelSettings.distanceToFirstRow = float.Parse(value);
     public void SetDistanceBetweenRows(string value) => CurrentLevelSettings.distanceBetweenRows = float.Parse(value);
@@ -84,7 +86,7 @@ public class LevelGenerator : MonoBehaviour
     {
         _obstacleParent = new GameObject("Obstacles").transform;
         _powerupsParent = new GameObject("Powerups").transform;
-
+        _nextPowerupThreshold = powerupSpawnRate;
         // Populate the pools
         for (int i = 0; i < 12; i++)
         {
@@ -151,9 +153,10 @@ public class LevelGenerator : MonoBehaviour
         SpawnObstacleRow(_nextRowZPos);
         _numberOfRows++;
 
-        if (_numberOfGeneratedObstacles >= powerupSpawnRate && Random.value < powerupSpawnChance)
+        if (_numberOfRows >= _nextPowerupThreshold && Random.value < powerupSpawnChance)
         {
             // Placing powerups in-between obstacle rows.
+            _nextPowerupThreshold += powerupSpawnRate;
             float zPosition = _nextRowZPos + CurrentLevelSettings.distanceBetweenRows / 2f;
             SpawnPowerup(zPosition);
         }
@@ -165,16 +168,16 @@ public class LevelGenerator : MonoBehaviour
     {
         // More obstacles
         int amountOfObstacles = Random.Range(Mathf.FloorToInt(LaneManager.NumberOfLanes * 0.7f), Mathf.FloorToInt(LaneManager.NumberOfLanes * rowObstaclePercentage));
-        List<int> laneIntegers = LaneManager.GetRandomUniqueLaneInts(amountOfObstacles);
+        List<float> LaneXPositions = LaneManager.GetRandomLaneXPositions(amountOfObstacles, out List<int> laneInts);
 
         for (int i = 0; i < amountOfObstacles; i++)
         {
             InteractableBlock obstacle = GetRandomObstacle();
 
-            int laneInteger = laneIntegers[i];
+            float laneX = LaneXPositions[i];
             // Set variables
-            obstacle.CurrentLaneInt = laneInteger;
-            obstacle.SetPosition(new(LaneManager.GetLaneX(laneIntegers[i]), 0, zPosition));
+            obstacle.CurrentLaneInt = laneInts[i];
+            obstacle.SetPosition(new(laneX, 0, zPosition));
 
             obstacle.gameObject.SetActive(true);
         }

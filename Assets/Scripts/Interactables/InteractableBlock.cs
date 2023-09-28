@@ -7,12 +7,8 @@ public class InteractableBlock : MonoBehaviour
 
     public int CurrentLaneInt { get => currentLaneInt; set => currentLaneInt = value; }
 
-    protected virtual void OnEnable()
-    {
-        Vector3 position = transform.position;
-        position.x = LaneManager.GetLaneX(CurrentLaneInt);
-        transform.position = position;
-    }
+    protected virtual void OnEnable() => LaneManager.OnLaneAddedLeftSide += () => CurrentLaneInt++;
+    protected virtual void OnDisable() => LaneManager.OnLaneAddedLeftSide -= () => CurrentLaneInt++;
 
     public void SetPosition(Vector3 position) => transform.position = position;
 

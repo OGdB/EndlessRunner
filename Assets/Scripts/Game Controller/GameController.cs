@@ -26,8 +26,9 @@ public class GameController : MonoBehaviour
     private static double _startTime = 0;
     private static double _endTime = 0;
 
-    public static Action OnGameStart { get; set; }
-    public static Action OnGameOver { get; set; }
+    public static Action OnGameStart { get; set; } // When the Start button is pressed ~ before countdown
+    public static Action OnGameStarted { get; set; }  // When the countdown is done
+    public static Action OnGameOver { get; set; }  // When the player lost all lives.
     public static int Score
     {
         get => _score; set
@@ -89,15 +90,15 @@ public class GameController : MonoBehaviour
         StopAllCoroutines();
     }
 
-    public static void StartGame()
+    public void StartGame()
     {
-        Singleton.StartCoroutine(CountdownCR());
+        StartCoroutine(CountdownCR());
 
-        static IEnumerator CountdownCR()
+        IEnumerator CountdownCR()
         {
             OnGameStart?.Invoke();
 
-            Singleton.countdownTimerText.gameObject.SetActive(true);
+            countdownTimerText.gameObject.SetActive(true);
 
             WaitForSeconds second = new(1f);
             int timeLeft = 3;
@@ -106,10 +107,11 @@ public class GameController : MonoBehaviour
             {
                 timeLeft--;
                 yield return second;
-                Singleton.countdownTimerText.SetText(timeLeft.ToString());
+                countdownTimerText.SetText(timeLeft.ToString());
             }
 
-            Singleton.countdownTimerText.gameObject.SetActive(false);
+            OnGameStarted?.Invoke();
+            countdownTimerText.gameObject.SetActive(false);
             GameStarted = true;
             _startTime = Time.time;
         }

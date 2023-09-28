@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +14,7 @@ public class LaneManager : MonoBehaviour
 
     public static List<Transform> Lanes { get; private set; } = new();
     public static int NumberOfLanes { get; set; } = 4;
+    public static Action OnLaneAddedLeftSide;
     #endregion
 
     private void OnEnable()
@@ -79,9 +81,12 @@ public class LaneManager : MonoBehaviour
 
         if (isLeftSide)
         {
-            PlayerController.CurrentLaneInt++;
             // Prepend the new lane to the list of lanes
             Lanes.Insert(0, newLane);
+
+            // Correct the registered current lane numbers of the player and other objects.
+            PlayerController.CurrentLaneInt++;
+            OnLaneAddedLeftSide?.Invoke();
         }
         else
         {
@@ -121,7 +126,7 @@ public class LaneManager : MonoBehaviour
     /// Return the world X position of the provided integer.
     /// </summary>
     /// <param name="laneInt"></param>
-    /// <returns></returns>
+    /// <returns>The x position of the lane with the provided integer</returns>
     public static float GetLaneX(int laneInt)
     {
         if (!LaneExists(laneInt))
@@ -138,7 +143,7 @@ public class LaneManager : MonoBehaviour
     public static int GetRandomAdjacentLane(int currentLaneInt)
     {
         // Random direction (1 or -1)
-        float randomNumber = Random.Range(0f, 1f);
+        float randomNumber = UnityEngine.Random.Range(0f, 1f);
         int randomDirection = (randomNumber < 0.5f) ? 1 : -1;
 
         int targetLane = currentLaneInt + randomDirection;
@@ -151,39 +156,6 @@ public class LaneManager : MonoBehaviour
             return targetLane;
 
         return -1;
-    }
-
-    /// <summary>
-    /// Return a randomly generated integer of an existing lane.
-    /// </summary>
-    /// <returns></returns>
-    public static int GetRandomLaneInt()
-    {
-        return Random.Range(0, NumberOfLanes);
-    }
-
-    /// <summary>
-    /// Generates a list of random lane integers with no duplicates.
-    /// </summary>
-    /// <param name="numberOfLanes">The number of unique lane integers to generate.</param>
-    /// <returns>A list of random lane integers with no duplicates.</returns>
-    public static List<int> GetRandomUniqueLaneInts(int numberOfLanes)
-    {
-        List<int> laneInts = new();
-        HashSet<int> uniqueInts = new();
-
-        while (uniqueInts.Count < numberOfLanes)
-        {
-            int randomLane = GetRandomLaneInt();
-
-            if (!uniqueInts.Contains(randomLane))
-            {
-                uniqueInts.Add(randomLane);
-                laneInts.Add(randomLane);
-            }
-        }
-
-        return laneInts;
     }
 
     /// <summary>
@@ -221,7 +193,7 @@ public class LaneManager : MonoBehaviour
     /// <returns>A random x-position representing a lane.</returns>
     public static float GetRandomLane(out int laneInt)
     {
-        laneInt = Random.Range(0, Lanes.Count - 1);
+        laneInt = UnityEngine.Random.Range(0, Lanes.Count - 1);
         float randomX = GetLaneX(laneInt);
         return randomX;
     }
