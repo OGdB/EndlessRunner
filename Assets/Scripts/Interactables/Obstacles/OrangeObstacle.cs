@@ -19,17 +19,19 @@ public class OrangeObstacle : GreyObstacle
         base.OnEnable();
 
         lastLaneInt = CurrentLaneInt;
-        PlayerController.OnLaneSwitch += OnPlayerSwitchesLane;
+        PlayerController.OnLaneSwitch += PlayerController_OnLaneSwitch;
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
 
-        PlayerController.OnLaneSwitch -= OnPlayerSwitchesLane;
+        PlayerController.OnLaneSwitch -= PlayerController_OnLaneSwitch;
+
+        StopAllCoroutines();
     }
 
-    private void OnPlayerSwitchesLane()
+    private void PlayerController_OnLaneSwitch()
     {
         if (_isMoving) return;
 
@@ -46,6 +48,26 @@ public class OrangeObstacle : GreyObstacle
     {
         yield return MoveToTargetPos(_targetPosition, movementSpeed);
         _isMoving = false;
+    }
+
+    /// <summary>
+    /// Smoothly moves the block to a specified target position.
+    /// </summary>
+    /// <param name="targetLanePos">The target position to move the block to.</param>
+    /// <param name="movementSpeed">The speed at which the block moves towards the target.</param>
+    /// <returns>An IEnumerator for coroutine usage.</returns>
+    protected IEnumerator MoveToTargetPos(Vector3 targetLanePos, float movementSpeed)
+    {
+        // Move towards the target position as long as it's not on that position.
+        while (transform.position != targetLanePos)
+        {
+            Vector3 nextPos = Vector3.MoveTowards(transform.position, targetLanePos, movementSpeed * Time.deltaTime);
+            transform.position = nextPos;
+
+            yield return FUpdate;
+        }
+
+        transform.position = targetLanePos;
     }
 
     private void OnTriggerEnter(Collider other)

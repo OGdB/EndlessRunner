@@ -119,7 +119,7 @@ public class GameController : MonoBehaviour
     public static void RestartLevel()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("LoadScene");
+        SceneManager.LoadScene(0);
     }
     public static void GameOver()
     {
