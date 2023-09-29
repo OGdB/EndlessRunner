@@ -18,5 +18,10 @@ public class StartGameUI : MonoBehaviour
     {
         startUiWrapper.SetActive(false);
     }
+
+    public static void SetRandomSeed(TMPro.TMP_InputField inputField)
+    {
+        inputField.text = Random.Range(0, int.MaxValue).ToString();
+    }
 }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 /// <summary>
 /// Responsible for instantiating lanes.
@@ -38,7 +39,7 @@ public class LaneManager : MonoBehaviour
         // Instantiate lanes based on the number of lanes
         for (int i = 0; i < NumberOfLanes; i++)
         {
-            Transform lane = Instantiate(lanePrefab, transform);
+            Transform lane = InstantiateLane();
             lane.name = $"Lane {i}";
             // Calculate the position for the current lane
             Vector3 position = initialPosition + Vector3.right * (i * laneWidth);
@@ -75,7 +76,8 @@ public class LaneManager : MonoBehaviour
         }
 
         // Instantiate the new lane at the calculated position
-        Transform newLane = Instantiate(lanePrefab, transform);
+        Transform newLane = InstantiateLane();
+
         newLane.name = $"Lane {NumberOfLanes - 1}";
         newLane.transform.SetPositionAndRotation(newPosition, Quaternion.identity);
 
@@ -93,6 +95,19 @@ public class LaneManager : MonoBehaviour
             // Append the new lane to the list of lanes
             Lanes.Add(newLane);
         }
+    }
+
+    private Transform InstantiateLane()
+    {
+        Transform newLane = Instantiate(lanePrefab, transform);
+        var constraint = newLane.GetComponent<PositionConstraint>();
+        var constraintSource = new ConstraintSource
+        {
+            sourceTransform = PlayerController.PlayerTransform,
+            weight = 1f
+        };
+        constraint.AddSource(constraintSource);
+        return newLane;
     }
 
     /// <summary>

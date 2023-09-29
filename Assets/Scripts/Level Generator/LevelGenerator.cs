@@ -43,7 +43,6 @@ public class LevelGenerator : MonoBehaviour
     [Header("Start & Settings UI")]
     [SerializeField] private Button startGameButton;
     [SerializeField] private TMPro.TMP_InputField seedInputField;
-    [SerializeField] private Toggle randomSeedToggle;
 
     [SerializeField] private TMPro.TMP_InputField numberOfStartLanesInput;
     [SerializeField] private TMPro.TMP_InputField visObstRowsInput;
@@ -133,10 +132,7 @@ public class LevelGenerator : MonoBehaviour
         // Set the seed based on the input of the inputfield // random seed toggle.
         startGameButton.gameObject.SetActive(false);
         seedInputField.gameObject.SetActive(false);
-        randomSeedToggle.gameObject.SetActive(false);
 
-        if (randomSeedToggle.isOn)
-            CurrentLevelSettings.seed = CurrentLevelSettings.seed = Random.Range(0, int.MaxValue);
         Random.InitState(CurrentLevelSettings.seed);
 
         _nextRowZPos = CurrentLevelSettings.distanceToFirstRow;

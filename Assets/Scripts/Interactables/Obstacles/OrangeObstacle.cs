@@ -75,9 +75,12 @@ public class OrangeObstacle : GreyObstacle
         // If colliding with another obstacle, restart the coroutine with moving in the other direction.
         if (!_isMoving) return;  // Don't start moving if it the other block is moving into this block while stationary.
 
-        StopAllCoroutines();
+        StopAllCoroutines();  // Stop the current movement
+
+        // Switch the target destination back to the previous lane.
         CurrentLaneInt = lastLaneInt;
         _targetPosition = LaneManager.GetTargetLanePosition(transform.position, CurrentLaneInt);
+
         _ = StartCoroutine(MoveToLaneCR());
     }
 /*    private void OnCollisionEnter(Collision collision)

@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Responsible for handling the input management and consequential movement between lanes of the player.
+/// </summary>
 [DefaultExecutionOrder(-1)]
 public class PlayerController : MonoBehaviour
 {
@@ -24,11 +27,12 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody _rb;
     public static PlayerInput _playerInput;
-
+/*
     public TextMeshProUGUI debugText1;
     public TextMeshProUGUI debugText2;
     public TextMeshProUGUI debugText3;
-
+*/
+    public static Transform PlayerTransform { get => Singleton.transform; }
     public static int CurrentLaneInt { get; set; } = 1;
     public static float ForwardMovementSpeed { get => Singleton.forwardMovementSpeed; set => Singleton.forwardMovementSpeed = value; }
     public static float SideMovementSpeed { get => Singleton.sideMovementSpeed; set => Singleton.sideMovementSpeed = value; }
@@ -83,8 +87,8 @@ public class PlayerController : MonoBehaviour
     {
         if (!GameController.GameStarted) return;
 
-        debugText1.SetText($"Forward speed: {forwardMovementSpeed}");
-        debugText2.SetText($"Side speed: {sideMovementSpeed}");
+/*        debugText1.SetText($"Forward speed: {forwardMovementSpeed}");
+        debugText2.SetText($"Side speed: {sideMovementSpeed}");*/
 
         ForwardMovement();
         Dash();
@@ -170,7 +174,7 @@ public class PlayerController : MonoBehaviour
 
             OnLaneSwitch?.Invoke();
 
-            debugText1.SetText($"Current Lane: {CurrentLaneInt}");
+//            debugText1.SetText($"Current Lane: {CurrentLaneInt}");
         }
     }
 

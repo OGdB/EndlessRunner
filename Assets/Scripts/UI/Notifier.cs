@@ -1,6 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Can be used to display messages to the player, such as error messages in runtime.
+/// </summary>
 public class Notifier : MonoBehaviour
 {
     private static Notifier Singleton;

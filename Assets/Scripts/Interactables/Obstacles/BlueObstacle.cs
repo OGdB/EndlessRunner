@@ -79,6 +79,7 @@ public class BlueObstacle : GreyObstacle
         // If colliding with another obstacle, change direction and reset the timer
         _currentDirectionInt *= -1;
         CurrentLaneInt = _lastLaneInt;
+
         _targetPosition = LaneManager.GetTargetLanePosition(transform.position, CurrentLaneInt);
     }
 }

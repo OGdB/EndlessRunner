@@ -15,6 +15,10 @@ public class GameController : MonoBehaviour
     private static GameController Singleton;
     public static bool GameStarted { get; private set; } = false;
 
+    [Space(5)]
+    [SerializeField] private int numberOfLivesAtStart = 3;
+
+    [Header("Assignables")]
     [SerializeField] private TextMeshProUGUI countdownTimerText;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI livesText;
@@ -67,6 +71,8 @@ public class GameController : MonoBehaviour
         }
 
         Singleton = this;
+
+        _lives = numberOfLivesAtStart;
     }
 
     private void Start()
@@ -114,11 +120,15 @@ public class GameController : MonoBehaviour
     public static void GameOver()
     {
         GameStarted = false;
+        Time.timeScale = 0;
+
+        Score = Mathf.RoundToInt(PlayerController.CurrentDistance);
+
         _endTime = Time.time;
         _totalTime = _endTime - _startTime;
-        Score = Mathf.RoundToInt(PlayerController.CurrentDistance);
-        Singleton.timeText.SetText($"Time: {_totalTime:F2}");
-        Time.timeScale = 0;
+        TimeSpan timeSpan = TimeSpan.FromSeconds(_totalTime);
+        string timeText = $"Time: {string.Format("{0:00}:{1:00}", timeSpan.Minutes, timeSpan.Seconds)} minutes";
+        Singleton.timeText.SetText(timeText);
 
         OnGameOver?.Invoke();
     }

@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Responsible for handling the progressing difficulty of the game.
+/// </summary>
 public class DifficultyProgression : MonoBehaviour
 {
     #region Properties
@@ -23,10 +26,6 @@ public class DifficultyProgression : MonoBehaviour
     #endregion
 
     /* Difficulty Progression:
-     * Phases until max phase?
-     * Linear gradual increase until max number?
-     *  Chose linear as I believe it'll have a smoother 'flow' in the user's perspective.
-     * 
      * For X amount of seconds, speed will not increase.
      * When the current speedIncreaseTime is reached, speed will start gradually increasing until the current
      * 'Sidemovement' speed increases in proportion with forward movement speed.
@@ -45,10 +44,7 @@ public class DifficultyProgression : MonoBehaviour
         _sideSpeedIncreaseRate = forwardSideRatio * _forwardSpeedIncreaseRate;
     }
 
-    private void Update()
-    {
-        SpeedIncrease();
-    }
+    private void Update() => SpeedIncrease();
 
     private void SpeedIncrease()
     {
