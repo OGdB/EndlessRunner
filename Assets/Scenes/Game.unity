@@ -986,8 +986,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 27.399902, y: -24}
-  m_SizeDelta: {x: 300, y: 162.1173}
+  m_AnchoredPosition: {x: 27.399902, y: -27.099976}
+  m_SizeDelta: {x: 300, y: 40.0576}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &203738788
 MonoBehaviour:
@@ -2588,8 +2588,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1000, y: 10, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1000, y: 10, z: 1879.6375}
+  m_Center: {x: 0, y: 0, z: -939.3187}
 --- !u!114 &649686170
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9036,7 +9036,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3a543b9c6b9fe14fa6c0c73b2777349, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfLivesAtStart: 1
+  numberOfLivesAtStart: 3
   countdownTimerText: {fileID: 1592373020}
   scoreText: {fileID: 60139353}
   livesText: {fileID: 2112844720}
@@ -9076,7 +9076,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 0}
+  m_SizeDelta: {x: 300, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2112844720
 MonoBehaviour:
@@ -9125,8 +9125,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 44
+  m_fontSizeBase: 44
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

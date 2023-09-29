@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -9,28 +8,21 @@ using UnityEngine;
 public class BlockCleaner : MonoBehaviour
 {
     public static Action PassedObstacleLine;
-    private static WaitForSeconds EventCooldownTimer;
-    private static bool _cooldown = false;
 
-    private void Awake() => EventCooldownTimer = new(0.5f);
+    private static int _lastRegisteredLane = -1;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer("Interactable"))
+        InteractableBlock interactableBlock = other.GetComponent<InteractableBlock>();
+        LevelGenerator.EnqueueInteractable(interactableBlock);
+
+        // _lastRegisteredLane == set to the last passed lane.
+        // Using thi
+        if (_lastRegisteredLane < interactableBlock.RowNumber)
         {
-            InteractableBlock interactableBlock = other.GetComponent<InteractableBlock>();
-            LevelGenerator.EnqueueInteractable(interactableBlock);
-
-            if (!_cooldown)
-                StartCoroutine(EventCooldown());
+            // If this interactable isn't part of the lane of the previous
+            _lastRegisteredLane = interactableBlock.RowNumber;
+            PassedObstacleLine?.Invoke();
         }
-    }
-
-    private IEnumerator EventCooldown()
-    {
-        PassedObstacleLine?.Invoke();
-        _cooldown = true;
-        yield return EventCooldownTimer;
-        _cooldown = false;
     }
 }

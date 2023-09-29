@@ -3,9 +3,11 @@ using UnityEngine;
 public class InteractableBlock : MonoBehaviour
 {
     private int currentLaneInt = 1;
+    private int rowNumber;
     protected bool _hit = false; // 'Safety check'; only allow interaction effect to trigger once.
 
     public int CurrentLaneInt { get => currentLaneInt; set => currentLaneInt = value; }
+    public int RowNumber { get => rowNumber; set => rowNumber = value; }
 
     protected virtual void OnEnable() => LaneManager.OnLaneAddedLeftSide += () => CurrentLaneInt++;
     protected virtual void OnDisable() => LaneManager.OnLaneAddedLeftSide -= () => CurrentLaneInt++;

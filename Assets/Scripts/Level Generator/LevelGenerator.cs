@@ -50,6 +50,7 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private TMPro.TMP_InputField distBetweenRowsInput;
 
     private static int _numberOfRows = 0;
+    public static int NumberOfRows { get { return _numberOfRows; } }
     private static int _numberOfGeneratedObstacles = 0;
 
     private static Transform _obstacleParent;
@@ -151,7 +152,6 @@ public class LevelGenerator : MonoBehaviour
     private void BlockCleaner_PassedObstacleLine()
     {
         SpawnObstacleRow(_nextRowZPos);
-        _numberOfRows++;
 
         if (_numberOfRows >= _nextPowerupThreshold && Random.value < powerupSpawnChance)
         {
@@ -170,6 +170,7 @@ public class LevelGenerator : MonoBehaviour
     /// <param name="zPosition">The z-position of the row</param>
     private void SpawnObstacleRow(float zPosition)
     {
+        _numberOfRows++;
         // More obstacles
         int amountOfObstacles = Random.Range(Mathf.FloorToInt(LaneManager.NumberOfLanes * 0.7f), Mathf.FloorToInt(LaneManager.NumberOfLanes * rowObstaclePercentage));
         List<float> LaneXPositions = LaneManager.GetRandomLaneXPositions(amountOfObstacles, out List<int> laneInts);
@@ -181,6 +182,7 @@ public class LevelGenerator : MonoBehaviour
             float laneX = LaneXPositions[i];
             // Set variables
             obstacle.CurrentLaneInt = laneInts[i];
+            obstacle.RowNumber = _numberOfRows;
             obstacle.SetPosition(new(laneX, 0, zPosition));
 
             obstacle.gameObject.SetActive(true);
